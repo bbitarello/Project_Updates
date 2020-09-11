@@ -1,0 +1,8 @@
+"0","dt=do.call(rbind, lapply(list.files(pattern=""*.csv""), function(X) fread(X, sep="","", header=T)))"
+"0","my_plot<-ggplot(dt, aes(x=Method,y=`Variance Explained (%)`, colour=`Discovery Cohort`, shape=`Test set`),) +"
+"0","        facet_wrap(~Phenotype, dir='v') + "
+"0","        geom_point(size=3) + "
+"0","        scale_color_manual(values = wes_palette(""Darjeeling2"")) + "
+"0","        theme_bw() "
+"0","print(my_plot)"
+"0",""

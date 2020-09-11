@@ -9,4 +9,5 @@
 "0","library(""htmltools"")"
 "0","library(""base64enc"")"
 "0","library(knitr)"
+"0","library(plotly)"
 "0","#source('render_with_widgets.R')"
