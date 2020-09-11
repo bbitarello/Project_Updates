@@ -1,0 +1,19 @@
+Discovery Cohort,Ancestry in Discovery Cohort,Phenotype,Co-variates,N_gwas,LD reference panel,Test set,Method,Variance Explained (%), Main Test Cohort Ancestry
+UKBB,European (British),BMI,Sex+Age+Age2,360388,UKBB (EUR),PMBB (EUR),LDpred-Inf,3.555839, EUR
+UKBB,European (British),BMI,Sex+Age+Age2,360388,UKBB (EUR),PMBB (EUR),LDpred (f=1),2.848509, EUR
+UKBB,European (British),BMI,Sex+Age+Age2,360388,UKBB (EUR),PMBB (EUR),LDpred (f=0.3),2.095857, EUR
+BBJ,East Asian (Japanese),BMI,Sex+Age+Age2,159095,1000G (EAS),PMBB (EUR),LDpred-Inf,1.066739, EUR
+BBJ,East Asian (Japanese),BMI,Sex+Age+Age2,159095,1000G (EAS),PMBB (EUR),LDpred (f=1),0.9953474, EUR
+BBJ,East Asian (Japanese),BMI,Sex+Age+Age2,159095,1000G (EAS),PMBB (EUR),LDpred (f=0.3),0.5194768, EUR
+UKBB,European (British),BMI,Sex+Age+Age2+pEUR,360388,UKBB (EUR),PMBB (AFR),LDpred-Inf,1.451389, AFR
+UKBB,European (British),BMI,Sex+Age+Age2+pEUR,360388,UKBB (EUR),PMBB (AFR),LDpred (f=1),0.9551837, AFR
+UKBB,European (British),BMI,Sex+Age+Age2+pEUR,360388,UKBB (EUR),PMBB (AFR),LDpred (f=0.3),0.4391952, AFR
+BBJ,East Asian (Japanese),BMI,Sex+Age+Age2+pEUR,159095,1000G (EAS),PMBB (AFR),LDpred-Inf,0.9859771, AFR
+BBJ,East Asian (Japanese),BMI,Sex+Age+Age2+pEUR,159095,1000G (EAS),PMBB (AFR),LDpred (f=1),0.5553877, AFR
+BBJ,East Asian (Japanese),BMI,Sex+Age+Age2+pEUR,159095,1000G (EAS),PMBB (AFR),LDpred (f=0.3),0.08648709, AFR
+UKBB,European (British),BMI,Sex+Age+Age2+pEUR,360388,UKBB (EUR),UKBB (CHI),LDpred-Inf,3.486, EAS
+UKBB,European (British),BMI,Sex+Age+Age2+pEUR,360388,UKBB (EUR),UKBB (CHI),LDpred (f=1),2.104, EAS
+UKBB,European (British),BMI,Sex+Age+Age2+pEUR,360388,UKBB (EUR),UKBB (CHI),LDpred (f=0.3),1.508, EAS
+BBJ,East Asian (Japanese),BMI,Sex+Age+Age2+pEUR,159095,1000G (EAS),UKBB (CHI),LDpred-Inf,4.929, EAS
+BBJ,East Asian (Japanese),BMI,Sex+Age+Age2+pEUR,159095,1000G (EAS),UKBB (CHI),LDpred (f=1),4.556, EAS
+BBJ,East Asian (Japanese),BMI,Sex+Age+Age2+pEUR,159095,1000G (EAS),UKBB (CHI),LDpred (f=0.3),2.994, EAS
