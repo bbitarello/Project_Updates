@@ -1,0 +1,3 @@
+"0","dt=do.call(rbind, lapply(list.files(pattern=""*.csv""), function(X) fread(X, sep="","", header=T)))"
+"0","my_table<-datatable(dt,options = list(pageLength = 12))"
+"0","my_table"
