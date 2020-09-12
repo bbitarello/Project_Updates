@@ -1,0 +1,84 @@
+---
+title: "PRS explorations report"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(data.table)
+library(ggplot2)
+library("wesanderson")
+library(shiny)
+library(DT)
+library(rmarkdown)
+library(markdown)
+library("htmltools")
+library("base64enc")
+library(knitr)
+library(plotly)
+#source('render_with_widgets.R')
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Chart C
+
+```{r}
+dt=do.call(rbind, lapply(list.files(pattern="*.csv"), function(X) fread(X, sep=",", header=T)))
+my_table<-datatable(dt,options = list(pageLength = 12))
+my_table
+#htmltools::includeHTML("widget_table.html")
+```
+
+Row {.tabset .tabset-fade}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+dt=do.call(rbind, lapply(list.files(pattern="*.csv"), function(X) fread(X, sep=",", header=T)))
+my_plot<-ggplot(dt, aes(x=Method,y=`Variance Explained (%)`, colour=`Discovery Cohort`, shape=`Test set`),) +
+        facet_wrap(~Phenotype, dir='v') + 
+        geom_point(size=3) + 
+        scale_color_manual(values = wes_palette("Darjeeling2")) + 
+        theme_bw() 
+print(my_plot)
+
+```
+
+
+### Chart B
+
+```{r}
+dt2<-dt[Method=='LDpred-Inf'][Phenotype=='Height']
+#dt2$Phenotype<-factor(dt2$Phenotype, levels=c('Height', 'BMI'))
+my_plot2<-ggplot(dt2, aes(x=`Main Test Cohort Ancestry`,y=`Variance Explained (%)`, colour=`Discovery Cohort`)) +
+#        facet_wrap(~Phenotype, dir='v') + 
+        geom_point(size=3) + 
+        scale_color_manual(values = wes_palette("Darjeeling2")) + 
+        theme_bw()+
+        labs(title="Height")
+print(my_plot2)
+
+```
+
+### Chart D
+
+```{r}
+dt2<-dt[Method=='LDpred-Inf'][Phenotype=='BMI']
+#dt2$Phenotype<-factor(dt2$Phenotype, levels=c('Height', 'BMI'))
+my_plot2<-ggplot(dt2, aes(x=`Main Test Cohort Ancestry`,y=`Variance Explained (%)`, colour=`Discovery Cohort`)) +
+#        facet_wrap(~Phenotype, dir='v') + 
+        geom_point(size=3) + 
+        scale_color_manual(values = wes_palette("Darjeeling2")) + 
+        theme_bw() +
+        labs(title="Height")
+print(my_plot2)
+
+```
+
+
