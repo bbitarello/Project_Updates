@@ -77,7 +77,6 @@ my_plot2<-ggplot(dt2, aes(x=`Main Test Cohort Ancestry`,y=`Variance Explained (%
         theme_bw() +
         labs(title="BMI")
 print(my_plot2)
-
 ```
 
 
