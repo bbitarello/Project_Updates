@@ -1,31 +1,31 @@
 Discovery Cohort,Ancestry in Discovery Cohort,Phenotype,Co-variates,N_gwas,LD reference panel,Test set,Method,Variance Explained (%), Main Test Cohort Ancestry
-UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB (EUR),PMBB (EUR),LDpred-Inf,9.1, EUR
-UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB (EUR),PMBB (EUR),LDpred (f=1),7.7, EUR
-UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB (EUR),PMBB (EUR),LDpred (f=0.3),6.3, EUR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2,360388,UKBB (EUR),HRS (EUR),LDpred-Inf,3.66, EUR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2,360388,UKBB (EUR),HRS (EUR),LDpred (f=1),0.56, EUR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2,360388,UKBB (EUR),HRS (EUR),LDpred (f=0.3),0.9, EUR
-UKBB, European (British), Height, Sex+Age+Age2, 360388,UKBB (EUR), HRS (EUR), LDpred-Inf, 19.23, EUR 
-UKBB, European (British), Height, Sex+Age+Age2, 360388,UKBB (EUR), HRS (EUR), LDpred (f=1), 16.91, EUR
-UKBB, European (British), Height, Sex+Age+Age2, 360388,UKBB (EUR), HRS (EUR), LDpred (f=0.3), 14.84, EUR
-UKBB, European (British), Height, Sex+Age+Age2+pEUR, 360388,UKBB (EUR), HRS (AFR), LDpred-Inf, 3.74, AFR
-UKBB, European (British), Height, Sex+Age+Age2+pEUR, 360388,UKBB (EUR), HRS (AFR), LDpred (f=1), 1.62, AFR 
-UKBB, European (British), Height, Sex+Age+Age2+pEUR, 360388,UKBB (EUR), HRS (AFR), LDpred (f=0.3), 1.18, AFR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,360388,UKBB (EUR),HRS (AFR),LDpred-Inf,1.77, AFR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,360388,UKBB (EUR),HRS (AFR),LDpred (f=1),0.53, AFR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,360388,UKBB (EUR),HRS (EUR),LDpred (f=0.3),0.18,AFR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G (EAS),PMBB (EUR),LDpred-Inf,1.7, EUR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G (EAS),PMBB (EUR),LDpred (f=1),1.0, EUR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G (EAS),PMBB (EUR),LDpred (f=0.3),0.5, EUR
-UKBB,European (British),Height,Sex+Age+Age2+pEUR,360388,UKBB (EUR),PMBB (AFR),LDpred-Inf,1.379,AFR
-UKBB,European (British),Height,Sex+Age+Age2+pEUR,360388,UKBB (EUR),PMBB (AFR),LDpred (f=1),0.595, AFR
-UKBB,European (British),Height,Sex+Age+Age2+pEUR,360388,UKBB (EUR),PMBB (AFR),LDpred (f=0.3),0.557, AFR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,159095,1000G (EAS),PMBB (AFR),LDpred-Inf,0.004, AFR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,159095,1000G (EAS),PMBB (AFR),LDpred (f=1),0.078, AFR
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,159095,1000G (EAS),PMBB (AFR),LDpred (f=0.3),0.041, AFR
-UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB (EUR),UKBB (CHI),LDpred-Inf,7.86, EAS
-UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB (EUR),UKBB (CHI),LDpred (f=1),4.83, EAS
-UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB (EUR),UKBB (CHI),LDpred (f=0.3),0.88, EAS
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G (EAS),UKBB (CHI),LDpred-Inf,5.915, EAS 
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G (EAS),UKBB (CHI),LDpred (f=1),4.454, EAS
-BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G (EAS),UKBB (CHI),LDpred (f=0.3),3.953, EAS
+UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB_EUR,PMBB_EUR,LDpred-Inf,9.1, EUR
+UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB_EUR,PMBB_EUR,LDpred (f=1),7.7, EUR
+UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB_EUR,PMBB_EUR,LDpred (f=0.3),6.3, EUR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2,360388,1000G_EAS,HRS_EUR,LDpred-Inf,3.66, EUR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2,360388,1000G_EAS,HRS_EUR,LDpred (f=1),0.56, EUR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2,360388,1000G_EAS,HRS_EUR,LDpred (f=0.3),0.9, EUR
+UKBB, European (British), Height, Sex+Age+Age2, 360388,UKBB_EUR, HRS_EUR, LDpred-Inf, 19.23, EUR 
+UKBB, European (British), Height, Sex+Age+Age2, 360388,UKBB_EUR, HRS_EUR, LDpred (f=1), 16.91, EUR
+UKBB, European (British), Height, Sex+Age+Age2, 360388,UKBB_EUR, HRS_EUR, LDpred (f=0.3), 14.84, EUR
+UKBB, European (British), Height, Sex+Age+Age2+pEUR, 360388,UKBB_EUR, HRS_AFR, LDpred-Inf, 3.74, AFR
+UKBB, European (British), Height, Sex+Age+Age2+pEUR, 360388,UKBB_EUR, HRS_AFR, LDpred (f=1), 1.62, AFR 
+UKBB, European (British), Height, Sex+Age+Age2+pEUR, 360388,UKBB_EUR, HRS_AFR, LDpred (f=0.3), 1.18, AFR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,360388,1000G_EAS,HRS_AFR,LDpred-Inf,1.77, AFR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,360388,1000G_EAS,HRS_AFR,LDpred (f=1),0.53, AFR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,360388,1000G_EAS,HRS_AFR,LDpred (f=0.3),0.18,AFR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G_EAS,PMBB_EUR,LDpred-Inf,1.7, EUR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G_EAS,PMBB_EUR,LDpred (f=1),1.0, EUR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G_EAS,PMBB_EUR,LDpred (f=0.3),0.5, EUR
+UKBB,European (British),Height,Sex+Age+Age2+pEUR,360388,UKBB_EUR,PMBB_AFR,LDpred-Inf,1.379,AFR
+UKBB,European (British),Height,Sex+Age+Age2+pEUR,360388,UKBB_EUR,PMBB_AFR,LDpred (f=1),0.595, AFR
+UKBB,European (British),Height,Sex+Age+Age2+pEUR,360388,UKBB_EUR,PMBB_AFR,LDpred (f=0.3),0.557, AFR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,159095,1000G_EAS,PMBB_AFR,LDpred-Inf,0.004, AFR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,159095,1000G_EAS,PMBB_AFR,LDpred (f=1),0.078, AFR
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2+pEUR,159095,1000G_EAS,PMBB_AFR,LDpred (f=0.3),0.041, AFR
+UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB_EUR,UKBB_CHI,LDpred-Inf,7.86, EAS
+UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB_EUR,UKBB_CHI,LDpred (f=1),4.83, EAS
+UKBB,European (British),Height,Sex+Age+Age2,360388,UKBB_EUR,UKBB_CHI,LDpred (f=0.3),0.88, EAS
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G_EAS,UKBB_CHI,LDpred-Inf,5.915, EAS 
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G_EAS,UKBB_CHI,LDpred (f=1),4.454, EAS
+BBJ,East Asian (Japanese),Height,Sex+Age+Age2,159095,1000G_EAS,UKBB_CHI,LDpred (f=0.3),3.953, EAS

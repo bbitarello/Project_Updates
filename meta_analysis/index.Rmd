@@ -81,21 +81,21 @@ We ran a meta-analysis using METAL using one file for each of the above datasets
 ## PRS for Height
 
 ```{r, echo=F}
-dt=do.call(rbind, lapply(list.files(pattern="*.csv"), function(X) fread(X, sep=",", header=T)))[Phenotype=='Height']
+dt=do.call(rbind, lapply(list.files(pattern="*.csv"), function(X) fread(X, sep=",", header=T)))
 my_table<-datatable(dt,options = list(pageLength = 12))
 #knitr::kable(dt)
 my_table
 ```
 
 ```{r, echo=F}
-dt2<-dt[Method=='LDpred-Inf'][Phenotype=='Height']
+dt2<-dt[Method=='LDpred-Inf']
 #dt2$Phenotype<-factor(dt2$Phenotype, levels=c('Height', 'BMI'))
-my_plot2<-ggplot(dt2, aes(x=`Main Test Cohort Ancestry`,y=`Variance Explained (%)`, colour=`Discovery Cohort`)) +
-#        facet_wrap(~Phenotype, dir='v') + 
+my_plot2<-ggplot(dt2, aes(x=`Main Test Cohort Ancestry`,y=`Variance Explained (%)`, colour=`Discovery Cohort`,shape=`Test set`)) + 
+       facet_wrap(~Phenotype, dir='h') + 
         geom_point(size=3) + 
         scale_color_manual(values = wes_palette("Darjeeling2")) + 
         theme_bw()+
-        labs(title="Height")
+        labs(title="")
 p<-ggplotly(my_plot2,tooltip="text")
 p
 ```
