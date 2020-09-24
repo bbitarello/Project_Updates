@@ -1,0 +1,3 @@
+"0","dt<-data.table(Datasets=c(""pan_UKBB"",""Uganda Genome \nProject"", ""N'diaye et al."", ""PAGE"", ""panUKBB_AFR+UGP+NDIAYE+PAGE_ALL""), Subsets=c(""AFR"",""All from meta-analysis (AFR)"",""All from meta-analysis (AFR)"", ""All ancestries"", ""ALL""), Total_AFR_Size=c(6636,14126,20427,17299, sum(c(6636,14126,20427,17299))), Total_other_Size=c(0,0,0,(49839-17299),(49839-17299))) "
+"0","my_table<-datatable(dt,options = list(pageLength = 12))"
+"0","my_table"

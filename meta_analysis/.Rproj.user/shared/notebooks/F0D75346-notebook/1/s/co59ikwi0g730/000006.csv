@@ -1,0 +1,16 @@
+"0","dt2<-dt[Method=='LDpred-Inf'][Phenotype=='Height']"
+"0","#dt2$Phenotype<-factor(dt2$Phenotype, levels=c('Height', 'BMI'))"
+"0","my_plot2<-ggplot(dt2, aes(x=`Main Test Cohort Ancestry`,y=`Variance Explained (%)`, colour=`Discovery Cohort`)) +"
+"0","#        facet_wrap(~Phenotype, dir='v') + "
+"0","        geom_point(size=3) + "
+"0","        scale_color_manual(values = wes_palette(""Darjeeling2"")) + "
+"0","        theme_bw()+"
+"0","        labs(title=""Height"")"
+"0","p<-ggplotly(my_plot2,tooltip=""text"")"
+"2","Error: .onLoad failed in loadNamespace() for 'Cairo', details:
+  call: dyn.load(file, DLLpath = DLLpath, ...)
+  error: unable to load shared object '/Library/Frameworks/R.framework/Versions/4.0/Resources/library/Cairo/libs/Cairo.so':
+  dlopen(/Library/Frameworks/R.framework/Versions/4.0/Resources/library/Cairo/libs/Cairo.so, 6): Library not loaded: /opt/X11/lib/libXrender.1.dylib
+  Referenced from: /Library/Frameworks/R.framework/Versions/4.0/Resources/library/Cairo/libs/Cairo.so
+  Reason: image not found
+"

@@ -1,0 +1,7 @@
+"0","library(flexdashboard)"
+"0","library(data.table)"
+"0","library(DT)"
+"2","Registered S3 method overwritten by 'htmlwidgets':
+  method           from         
+  print.htmlwidget tools:rstudio
+"
