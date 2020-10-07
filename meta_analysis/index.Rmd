@@ -221,7 +221,7 @@ ggplotly(plot_pmbb_afr_1)
 ggplotly(plot_hrs_afr_2)
 ```
 
-```{r, out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 7: Linear combinations of PRS for PMBB_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
+```{r, out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 7: Linear combinations of PRS for HRS_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
 
 ggplotly(plot_hrs_afr_1)
 ```
