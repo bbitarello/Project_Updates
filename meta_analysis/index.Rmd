@@ -166,7 +166,6 @@ dt=fread('ldpred_table.txt')
 dt[,AIC:=round(AIC,1)]
 dt[,Train:=gsub('_train','', dt$Test)]
 dt$Train<-factor(dt$Train)
-levels(dt$Train)<-c('hrs_eur', 'pmbb_eur', 'hrs_afr', 'pmbb_afr', 'chi')
 data_long <- gather(dt, variable, value, -c(Train, Summary_Stats,LDpred_model,Test))
 #dt2<-melt(dt, by=c('R2','AIC'))
 p2<-ggplot(dt, aes(x=Train, y=R2,color=Summary_Stats, shape=LDpred_model)) +
@@ -186,7 +185,6 @@ for (I in c('pmbb_afr', 'hrs_afr', 'chi')){
 my_plot<-paste0(paste0('plot_', I),c('_1', '_2')) 
 dt2<-dt3[Train==I]
 dt2$Model<-factor(dt2$Model)
-levels(dt2$Model)<-c("LDpred-Inf", "LDpred-p1", "LDpred-p03")
 dt2[,Base_Rsq:=ifelse(Model=='LDpred-Inf',
 max(dt2[Model=='LDpred-Inf' & Alpha==0.00]$R_sq),
 ifelse(Model=='LDpred-p1', 
