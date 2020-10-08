@@ -82,7 +82,7 @@ We inspected the p-value distribution of these meta-analyses using QQ-plots and 
 
 
 ```{r, echo=F}
-dt<-data.table(Datasets=c("pan-UKBB","Uganda Genome \nProject", "N'diaye\n et al.", "PAGE", "META_AFR", "BBJ", "META_ALL"), Subsets=c(NA,"All from \nmeta-analysis (AFR)","All from \nmeta-analysis (AFR)", "All", NA,  NA, NA), Total_AFR=c(6636,14126,20427,17299, sum(c(6636,14126,20427,17299)),0,sum(c(6636,14126,20427,17299))), Total_other=c(476197,0,0,(49839-17299),(49839-17299),159095,(32540+159095+476197)))[,Grant_total:=Total_AFR+Total_other][, Lambda:=c("1.037(1.047)",1.018,1.065,1.183, 1.03,1.206,NA)]
+dt<-data.table(Datasets=c("pan-UKBB","Uganda Genome \nProject", "N'diaye\n et al.", "PAGE", "META_AFR", "BBJ", "META_ALL"), Subsets=c(NA,"All from \nmeta-analysis (AFR)","All from \nmeta-analysis (AFR)", "All", NA,  NA, NA), Total_AFR=c(6636,14126,20427,17299, sum(c(6636,14126,20427,17299)),0,sum(c(6636,14126,20427,17299))), Total_other=c(476197,0,0,(49839-17299),(49839-17299),159095,(32540+159095+476197)))[,Grant_total:=Total_AFR+Total_other][, Lambda:=c("1.037(1.047)",1.018,1.065,1.183, 1.03,1.206, 1.01)]
 my_table<-datatable(dt,options = list(pageLength = 12), caption="Table 1. Summary statistics used in meta-analyses.")
 my_table
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
