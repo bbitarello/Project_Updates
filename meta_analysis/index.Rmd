@@ -82,7 +82,7 @@ We inspected the p-value distribution of these meta-analyses using QQ-plots and 
 
 
 ```{r, echo=F}
-dt<-data.table(Datasets=c("pan-UKBB","Uganda Genome \nProject", "N'diaye\n et al.", "PAGE", "META_AFR", "BBJ", "META_ALL"), Subsets=c(NA,"All from \nmeta-analysis (AFR)","All from \nmeta-analysis (AFR)", "All", NA,  NA, NA), Total_AFR=c(6636,14126,20427,17299, sum(c(6636,14126,20427,17299)),0,sum(c(6636,14126,20427,17299))), Total_other=c(476197,0,0,(49839-17299),(49839-17299),159095,(32540+159095+476197)))[,Grant_total:=Total_AFR+Total_other][, Lambda:=c("1.037(1.047)",1.018,1.065,1.183, 1.03,NA,NA)]
+dt<-data.table(Datasets=c("pan-UKBB","Uganda Genome \nProject", "N'diaye\n et al.", "PAGE", "META_AFR", "BBJ", "META_ALL"), Subsets=c(NA,"All from \nmeta-analysis (AFR)","All from \nmeta-analysis (AFR)", "All", NA,  NA, NA), Total_AFR=c(6636,14126,20427,17299, sum(c(6636,14126,20427,17299)),0,sum(c(6636,14126,20427,17299))), Total_other=c(476197,0,0,(49839-17299),(49839-17299),159095,(32540+159095+476197)))[,Grant_total:=Total_AFR+Total_other][, Lambda:=c("1.037(1.047)",1.018,1.065,1.183, 1.03,1.206,NA)]
 my_table<-datatable(dt,options = list(pageLength = 12), caption="Table 1. Summary statistics used in meta-analyses.")
 my_table
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
@@ -161,7 +161,7 @@ my_table3<-datatable(dt,options = list(pageLength = 12))
 my_table3
 ```
 
-```{r, out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 3: Partial-R2 for height PRS for different test cohorts and using different summary statistics and LDpred models "}
+```{r, chunk='R2_table', out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 3: Partial-R2 for height PRS for different test cohorts and using different summary statistics and LDpred models "}
 dt=fread('ldpred_table.txt')
 dt[,AIC:=round(AIC,1)]
 dt[,Train:=gsub('_train','', dt$Test)]
@@ -179,7 +179,7 @@ ggplotly(p2)
 ```
 
 
-```{r, out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 4: Linear combinations of PRS for PMBB_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alpha=0. Anc2 is the ancestry of the second PRS component."}
+```{r, chunk='PRS1_2_figure',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 4: Linear combinations of PRS for PMBB_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alpha=0. Anc2 is the ancestry of the second PRS component."}
 dt3=fread('PRS1_2_table.txt')
 for (I in c('pmbb_afr', 'hrs_afr', 'chi')){
 my_plot<-paste0(paste0('plot_', I),c('_1', '_2')) 
@@ -209,28 +209,33 @@ print(dt2[which.max(dt2$R_sq),])
 ggplotly(plot_pmbb_afr_2)
 ```
 
-```{r, out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 5: Linear combinations of PRS for PMBB_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
+
+```{r, chunk='PRS1_2_figure5',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 5: Linear combinations of PRS for PMBB_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
 
 ggplotly(plot_pmbb_afr_1)
 ```
 
 
-```{r, out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 6: Linear combinations of PRS for HRS_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alfa=0. Anc2 is the ancestry of the second PRS component."}
+
+```{r, chunk='PRS1_2_figure6',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 6: Linear combinations of PRS for HRS_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alfa=0. Anc2 is the ancestry of the second PRS component."}
 ggplotly(plot_hrs_afr_2)
 ```
 
-```{r, out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 7: Linear combinations of PRS for HRS_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
 
+
+```{r,out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 7: Linear combinations of PRS for HRS_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
 ggplotly(plot_hrs_afr_1)
 ```
 
 
-```{r, out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 8: Linear combinations of PRS for UKB_CHI. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alpha=0. Anc2 is the ancestry of the second PRS component."}
+
+```{r, chunk='PRS1_2_figure8', out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 8: Linear combinations of PRS for UKB_CHI. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alpha=0. Anc2 is the ancestry of the second PRS component."}
 ggplotly(plot_chi_2)
 ```
 
 
-```{r, out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 9: Linear combinations of PRS for UKB_CHI. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
+
+```{r, chunk='PRS1_2_figure9',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 9: Linear combinations of PRS for UKB_CHI. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
 ggplotly(plot_chi_1)
 ```
 
