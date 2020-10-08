@@ -156,7 +156,7 @@ $$height~Sex+Age+Age2+pEUR+PRS_{eur}$$
 ```{r, echo=F, chunk='ldpred_table'}
 dt=fread('ldpred_table.txt')
 dt[,AIC:=round(AIC,1)]
-my_table3<-datatable(dt,options = list(pageLength = 12))
+my_table3<-datatable(dt,options = list(pageLength = 12),caption="Table 3. LDpred models")
 #knitr::kable(dt)
 my_table3
 ```
