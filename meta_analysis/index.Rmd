@@ -95,7 +95,7 @@ knitr::include_graphics("qqplot.png")
 ```
 
 
-```{r, out.width = "460px",echo=FALSE, eval=T, fig.cap="Fig 2: Manhattan plot for meta-AFR GWAS (top) and UKBB_EUR (bottom, for comparison). Genome-wide significance line is plotted at P=1e-08. SNPs above that threshold are plotted in red (49 and 3,308  SNPs for meta-AFR and UKBB_Eur, respectively). SNPs above threshold in both meta-AFR and UKBB_eur GWAS are plotted in orange (8 SNPs). SNPs were clumped prior to plotting (P<=5e-04, 100Kb window)."}
+```{r, out.width = "760px",echo=FALSE, eval=T, fig.cap="Fig 2: Manhattan plot for meta-AFR GWAS (top) and UKBB_EUR (bottom, for comparison). Genome-wide significance line is plotted at P=1e-08. SNPs above that threshold are plotted in red (49 and 3,308  SNPs for meta-AFR and UKBB_Eur, respectively). SNPs above threshold in both meta-AFR and UKBB_eur GWAS are plotted in orange (8 SNPs). SNPs were clumped prior to plotting (P<=5e-04, 100Kb window)."}
 knitr::include_graphics("qqman_ggplot_comparison.png")
 ```
 
