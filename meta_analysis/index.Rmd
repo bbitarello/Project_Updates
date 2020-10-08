@@ -124,7 +124,7 @@ Each test cohort was randomly divided into a "train" and a "test" set following 
 ```{r, echo=F,out.width = "460px"}
 dt2<-data.table(Dataset=c('PMBB', 'PMBB', 'HRS','HRS', 'UKBB'), Subset=c('AFR', 'EUR','AFR', 'EUR','CHI'), Mean_pEUR=c(19.9,1,17.5,1,NA), N_total=c(8808,6775,1596,7233,1496),Females=c(63.3,39.6,62.7,57.4,62.5),N_train=c(6166,4744,682,3099,226), N_test=c(2642,2031,1822,8781,1270))
 #knitr::kable(dt2, caption="Table 2. Test cohorts")
-my_table2<-datatable(dt,options = list(pageLength = 12), caption="Table 2. Test cohorts")
+my_table2<-datatable(dt2,options = list(pageLength = 12), caption="Table 2. Test cohorts")
 my_table2
 ```
 
