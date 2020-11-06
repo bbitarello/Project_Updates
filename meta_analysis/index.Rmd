@@ -36,58 +36,116 @@ In that study we ran a GWAS in ~8,000 individuals with African ancestry from the
 
 It is possible that that modest improvement was due to our low sample size. So here we use a much larger sample size (about 58K African ancestry individuals and 91K total) to explore the potential of ancestry-informed PRSs for height. We also try a larger meta-analysis, with 58K African ancestry individuals and 
 
+Another interesting thing is to see whether by fine-mapping index variants by including African ancestry we can select SNPs that yield better PRS performance.
+
+Questions:
+
+1) Does multi-PRS and LA-PRS increase in predictio by using effect-sizes from a meta-African analysis? What about a meta-Pan analysis?
+
+2) What is the overlap between GWAS hits between GWAS for EUR only and BBJ only, AFR only and combinations of those?
+
+3) When we select ancestry-specific index variants and then use those in the PRS, does prediction improve?
+
+4) Other questions?
 # Methods
 
 For now, we are focusing on height only.
 
 ## GWAS summary statistics
-We use GWAS summary statistics for height from four sources: 
-*Uganda Genome Project - which is a meta-analysis of Uganda + 3 other populations from Africa); 
+We use GWAS summary statistics for height from six sources::
 
-* pan UKBB (both the 'African' subset and the entire set) - this is a height GWAS done for each subpopulation in the UK Biobank separately; 
+*UKBB_eur: UK Biobank Europeans
+
+*BBJ: Biobank Japan
+
+*Uganda Genome Project - which is a meta-analysis of Uganda + 3 other populations from Africa, described in the Uganda Genome Project paper); 
+
+* UKBB_afr- from the African subset from the panUKBB dataset.
 
 * N'diaye et al. 2011 - still the largest height GWAS performed in African ancestry individuals; 
 
 * PAGE, a large meta-analysis including 35% African Americans and the remaining participants are mostly of Hispanic/Latino and other minority ancestries.
 
+So our meta-AFR analysis includes: PAGE, Ndiaye, UKBB_afr and 4 cohorts from UGP. 
 
-## Summary statistics QC
-
-Most were in hg19 build, except N'diaye, which we lift over to hg19 from hg18. Previous filtering was done in each of these studies, and there is often not enough information for us to perform our own filtering.
-
-* UGP: this is very recent. They filtered for imputation score > 0.3.
-
-* pan-UKBB: They filter for INFO scores > 0.8 and minimum allele count of 20 in each population. They also provide a True/False filter for "low_quality_AFR" which we use, retaining only those for which it is 'false'. We used this filter in both the meta-AFR and meta-ALL meta-analyses. GWAS included: Age, sex, Age\*sex, Age2, Age2\*sex, the first 10 PCs. Inverse-normal transformation of height in cm.
-
-* N'diaye et al.: The genomic control inflation (GC) factor was calculated for each study and used for within-study correction, prior to the meta-analysis. The overall lambda they report is 1.064 (which we confirm, see table below) suggesting no inflation in this meta-analysis. Imputation info score not available, but authors filtered for >= 0.3. Betas and SE in units of z-score.
-
-PAGE: inverse-normal-adjusted residuals for each trait outcome. Info score available. Filtered for > 0.4 by authors prior. We were more strict and filtered for > 0.8.
+Our meta-all analysis includes: meta-AFR, UKBB_eur, BBJ.
 
 ## Meta-analysis in METAL
 
 We performed two meta-analysis:
 
-*meta-AFR: UGP+pan-UKBB(AFR)+N'Diaye et al. 2011 meta-analysis, PAGE project. Total of 91,028 individuals (58488 of African ancestry). See Table 1.
+*meta-AFR: UGP+pan-UKBB(AFR)+N'Diaye et al. 2011 meta-analysis, PAGE project. Total of 90,970 individuals (58488 of African ancestry). See Table 1.
 
-*meta-ALL: UGP+pan-UKBB(All ancestries) + Biobank Japan (BBJ) + N'Diaye et al. 2011 meta-analysis, PAGE project. Total of 726320 (58488 of African ancestry). See Table 1.
+*meta-ALL: Our meta-ALL analysis includes: UKBB_eur, meta-AFR (previous step), BBJ (Biobank Japan, N=159,095) Total of 610,453 (58488 of African ancestry). See Table 1.
 
-Note that both have the same amount of African ancestry individuals. We performed meta-ALL to check whether bigger sample size, even if not for African ancestry, would change predictions.
+Note that both have the same amount of African ancestry individuals (N=XX). We performed meta-ALL to check whether bigger sample size and increased diversity in the discovery cohort would improve predictions.
 
-
-We ran a meta-analysis using METAL using one file for each of the above datasets. We set genomic correction to "ON", meaning it is performed for each file (not the final values). We performed the meta-analysis using SCHEME STDERR, meaning betas and SE are used. For the meta-AFR analysis, we set AVERAGEFREQ and MINMAXFREQ to "ON" so that metal can track large allelic frequency differences across datasets as suggestion of allelic mismatch. We only report results for variants that have a combined weight of at least 45000 (meta-AFR) or 360000 individuals, resulting in about 32.5 million autosomal variants in both datasets.
-
+We ran a meta-analysis using METAL using one file for each of the above datasets. We set genomic correction to "ON", meaning it is performed for each file (not the final values). We performed the meta-analysis using SCHEME STDERR, meaning betas and SE are used. For the meta-AFR analysis, we set AVERAGEFREQ and MINMAXFREQ to "ON" so that metal can track large allelic frequency differences across datasets as suggestion of allelic mismatch. We only report results for variants that have a combined weight of at least 49,781 (meta-AFR) or 590026 individuals, resulting in about 20 million autosomal variants in both datasets. 
 
 We inspected the p-value distribution of these meta-analyses using QQ-plots and calculated the genomic inflation on the final p-values, and performed corrections accordingly.
 
 
 
+## Data QC
+
+## Summary statistics QC
+
+Most were in hg19 build, except N'diaye, which we lift over from hg18 to hg19. Previous filtering was done in each of these studies, and there is often not enough information for us to perform our own filtering.
+
+* UGP: this is very recent. They filtered for imputation score > 0.3.
+
+* pan-UKBB: They filter for INFO scores > 0.8 and minimum allele count of 20 in each population. They also provide a True/False filter for "low_quality_AFR" which we use, retaining only those for which it is 'false'. GWAS included: Age, sex, Age\*sex, Age2, Age2\*sex, the first 10 PCs. Inverse-normal transformation of height in cm.
+
+* N'diaye et al.: The genomic control inflation (GC) factor was calculated for each study and used for within-study correction, prior to the meta-analysis. The overall lambda they report is 1.064 (which we confirm, see table below) suggesting no inflation in this meta-analysis. Imputation info score not available, but authors filtered for >= 0.3. Betas and SE in units of z-score.
+
+PAGE: inverse-normal-adjusted residuals for each trait outcome. Info score available. Filtered for > 0.4 by authors prior. We were more strict and filtered for > 0.8.
+
+As mentioned, for the meta-analyses summary statistics we only retained positions for which there was information for most individuals in the meta-analysis (20.7 and 23.7 M SNPs for meta-AFR and meta-ALL respectively).
+
+For UKBB_eur, we retained only SNPs with INFO> 0.8 (11.9 M SNPs) and low_quality_variant=FALSE (15.4 M SNPs). Only autosomal SNPs were analyzed. 
+
+### LD reference panels
+
+For PRS using summary statistics from the UKBB_eur, we used the UKBB_eur (5,000 randomly sampled) imputed data as LD reference panel.For PRS using the BBJ summary statictics, we used a combination of the 1000G Phase 3 East Asians and UKBB Chinese individuals. For the meta-AFR summary statistics, we used a combination of UKBB_afr and 1000G Phase 3 African ancestry individuals. For the meta-ALL summary statistics, we used a combination of all Phase 3 1000G individuals, the UKBB_eur, UKBB_afr, and UKBB_chi. In all cases, the combined sets were QC'd to only include unrelated individuals (plink --rel-cutoff 0.125) and with genotype missingness < 0.85. We further restricted these sets to SNPs with MAF > 0.001. We further removed SNPs with allelic mismatch with the UKBB_EUR summary statistics file and corrected for strand flipping when appropriate. 
+
+### Test data
+
+For test data, we used the Penn Biobank subsets of European American and African American individuals (Table XX), the HRS subsets of European and African Americans, and the UKBB Chinese individuals (Table XX). We also looked at 33 Japanese Brazilians from the SABE cohort.
+Individuals with height further than two deviations from the sex-cohort specific mean were not included. (Table 3)
+
 ```{r, echo=F}
-dt<-data.table(Datasets=c("pan-UKBB","Uganda Genome \nProject", "N'diaye\n et al.", "PAGE", "META_AFR", "BBJ", "META_ALL"), Subsets=c(NA,"All from \nmeta-analysis (AFR)","All from \nmeta-analysis (AFR)", "All", NA,  NA, NA), Total_AFR=c(6636,14126,20427,17299, sum(c(6636,14126,20427,17299)),0,sum(c(6636,14126,20427,17299))), Total_other=c(476197,0,0,(49839-17299),(49839-17299),159095,(32540+159095+476197)))[,Grant_total:=Total_AFR+Total_other][, Lambda:=c("1.037(1.047)",1.018,1.065,1.183, 1.03,1.206, 1.01)]
-my_table<-datatable(dt,options = list(pageLength = 12), caption="Table 1. Summary statistics used in meta-analyses.")
+dt<-data.table(
+        Datasets=c("UKBB_eur","Uganda Genome \nProject", "N'diaye\n et al.", "PAGE", "BBJ", "UKBB_afr"), 
+        Ancestries=c("European","African","African, African + European","African, Hispanic, European and others", "Japanese", "African+European"),
+        Total=c(360388,14126,20427,49839,159095, 6636),
+        Total_AFR=c(0,14126,20427,17299, 0, 6636))
+dt[,Total_other=Total-Total_AFR] 
+my_table<-datatable(dt,options = list(pageLength = 12), caption="Table 2. Summary statistics used in this study.")
 my_table
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
 ```
 
+
+```{r, echo=F}
+dt2<-data.table(Datasets=c('meta-AFR', 'meta-ALL'), Lambda:=c(NA,NA),  TotalSampleSize=c(),SampleSizeThresh=c(49781,590026), N_pos_QC=c(20777174, 2370628))
+my_table2<-datatable(dt2,options = list(pageLength = 12), caption="Table 1. Meta-analyses")
+my_table2
+#knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
+```
+
+```{r, echo=F}
+dt3<-data.table(Set=c('ALL', 'AFR', 'EAS', 'EUR'), Sources=c("1KGP3'+UKBB_eur+UKBB_afr+UKBB_chi", "1KGP3_afr+UKBB_afr", "1KGP3_eas+UKBB_chi", "UKBB_eur"), N_indiv_QC=c(5974,4521,1936,4994), N_snps_QC=c(1439609,1651938,1559474,1920308))
+my_table3<-datatable(dt3,options = list(pageLength = 12), caption="Table 3. LD reference panels post quality control")
+my_table3
+#knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
+```
+
+```{r, echo=F}
+dt4<-data.table(Dataset=c('UKBB_chi', 'PMBB_afr', 'HRS_afr', 'PMBB_eur', 'HRS_eur'), N_indiv_QC=c(1467,8726,2251,6709,10159), N_snps_QC=c(784027,602645,2183141, 610494,2183141))
+my_table4<-datatable(dt4,options = list(pageLength = 12), caption="Table 4. Test data post quality control")
+my_table4
+#knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
+```
 
 
 ```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 1: QQ-plot for meta-AFR. P-values were GC corrected within each dataset, but not the final meta-AFR analysis. Based on the lambda value show here, downstream analyses referred to corrected final p-values."}
@@ -162,13 +220,13 @@ my_table3
 ```
 
 ```{r, chunk='R2_table', out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 3: Partial-R2 for height PRS for different test cohorts and using different summary statistics and LDpred models "}
-dt=fread('ldpred_table.txt')
+dt=fread('ldpred_table.txt')[LDpred_model=='Inf']
 dt[,AIC:=round(AIC,1)]
 dt[,Train:=gsub('_train','', dt$Test)]
 dt$Train<-factor(dt$Train)
 data_long <- gather(dt, variable, value, -c(Train, Summary_Stats,LDpred_model,Test))
 #dt2<-melt(dt, by=c('R2','AIC'))
-p2<-ggplot(dt, aes(x=Train, y=R2,color=Summary_Stats, shape=LDpred_model)) +
+p2<-ggplot(dt, aes(x=Train, y=R2,color=Summary_Stats)) +
 geom_jitter(size=3, alpha=0.7, width=0.2) + 
 #facet_wrap(~variable, nrow=2, scales='free')  +     
 scale_color_manual(name='',values = wes_palette("Moonrise3",3), labels=c('BBJ_eas','meta-AFR','UKBB_eur')) + 
