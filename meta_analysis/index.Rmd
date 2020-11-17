@@ -12,6 +12,7 @@ library(flexdashboard)
 library(data.table)
 library(DT)
 library(dplyr)
+library(tidyr)
 library(readr)
 library(ggplot2)
 library(captioner)
@@ -110,7 +111,7 @@ For PRS using summary statistics from the UKBB_eur, we used the UKBB_eur (5,000 
 
 ### Test data
 
-For test data, we used the Penn Biobank subsets of European American and African American individuals (Table XX), the HRS subsets of European and African Americans, and the UKBB Chinese individuals (Table XX). We also looked at 33 Japanese Brazilians from the SABE cohort.
+For test data, we used the Penn Biobank subsets of European American and African American individuals (Table XX), the HRS subsets of European and African Americans, and the UKBB Chinese individuals (Table XX). 
 Individuals with height further than two deviations from the sex-cohort specific mean were not included. (Table 3)
 
 ```{r, echo=F}
@@ -118,31 +119,31 @@ dt<-data.table(
         Datasets=c("UKBB_eur","Uganda Genome \nProject", "N'diaye\n et al.", "PAGE", "BBJ", "UKBB_afr"), 
         Ancestries=c("European","African","African, African + European","African, Hispanic, European and others", "Japanese", "African+European"),
         Total=c(360388,14126,20427,49839,159095, 6636),
-        Total_AFR=c(0,14126,20427,17299, 0, 6636))
-dt[,Total_other=Total-Total_AFR] 
-my_table<-datatable(dt,options = list(pageLength = 12), caption="Table 2. Summary statistics used in this study.")
+        Total_AFR=c(0,14126,20427,17299, 0,6636))
+dt[,Total_other:=Total-Total_AFR] [,N_SNPs:=c(11941213,24704819,3166314,25887135,25376652,20512513)][,N_SNPs_QC:=c(11939557,NA,NA,NA,15477000,NA)]
+my_table<-datatable(dt,options = list(pageLength = 12), caption="Table 1. Summary statistics used in this study.")
 my_table
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
 ```
 
 
 ```{r, echo=F}
-dt2<-data.table(Datasets=c('meta-AFR', 'meta-ALL'), Lambda:=c(NA,NA),  TotalSampleSize=c(),SampleSizeThresh=c(49781,590026), N_pos_QC=c(20777174, 2370628))
-my_table2<-datatable(dt2,options = list(pageLength = 12), caption="Table 1. Meta-analyses")
+dt2<-data.table(Datasets=c('meta-AFR', 'meta-ALL'), Lambda=c(NA,NA),  TotalSampleSize=c(),SampleSizeThresh=c(90000,590000), N_pos_QC=c(2959565, 2298328))
+my_table2<-datatable(dt2,options = list(pageLength = 12), caption="Table 2. Meta-analyses")
 my_table2
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
 ```
 
 ```{r, echo=F}
-dt3<-data.table(Set=c('ALL', 'AFR', 'EAS', 'EUR'), Sources=c("1KGP3'+UKBB_eur+UKBB_afr+UKBB_chi", "1KGP3_afr+UKBB_afr", "1KGP3_eas+UKBB_chi", "UKBB_eur"), N_indiv_QC=c(5974,4521,1936,4994), N_snps_QC=c(1439609,1651938,1559474,1920308))
-my_table3<-datatable(dt3,options = list(pageLength = 12), caption="Table 3. LD reference panels post quality control")
+dt3<-data.table(Set=c('ALL', 'AFR', 'EAS', 'EUR'), Sources=c("1KGP3_all", "1KGP3_afr", "1KGP3_eas", "UKBB_eur"), N_indiv=c(2598,660,504,5000), N_snps=c(2697305,2697305,2697305,2585257))
+my_table3<-datatable(dt3,options = list(pageLength = 12), caption="Table 3. LD reference panels ")
 my_table3
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
 ```
 
 ```{r, echo=F}
-dt4<-data.table(Dataset=c('UKBB_chi', 'PMBB_afr', 'HRS_afr', 'PMBB_eur', 'HRS_eur'), N_indiv_QC=c(1467,8726,2251,6709,10159), N_snps_QC=c(784027,602645,2183141, 610494,2183141))
-my_table4<-datatable(dt4,options = list(pageLength = 12), caption="Table 4. Test data post quality control")
+dt4<-data.table(Dataset=c('UKBB_chi', 'PMBB_afr', 'HRS_afr', 'PMBB_eur', 'HRS_eur'), N_indiv_QC=c(1467,8726,2251,6709,10159), N_snps=c(784027,602645,2183141,610494,2183141))
+my_table4<-datatable(dt4,options = list(pageLength = 12), caption="Table 4. Test data post filtering")
 my_table4
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
 ```
@@ -177,15 +178,6 @@ $$height\sim Sex+Age+Age^2+Sex*Age+Sex*Age^2+pEUR+Sex*pEUR+Age*pEUR+Age^2*pEUR$$
 When multiple time points were available for each individual, we retained the one corresponding to the latest height measure and age. All height phenotype data was formatted to be in centimeters. 
 
 Each test cohort was randomly divided into a "train" and a "test" set following the ratio of 0.15 (train) and 0.85 (test) for most datasets, except for UKB_CHI and HRS_afr, where we used 0.20:0.80 (Table 2). We performed a stratified split of the data using the initial_split function from the rsample R package. We used 'Sex' as strate, i.e, to maintain Sex proportions within training and testing sets similar (Table 2)
-
-
-```{r, echo=F,out.width = "460px"}
-dt2<-data.table(Dataset=c('PMBB', 'PMBB', 'HRS','HRS', 'UKBB'), Subset=c('AFR', 'EUR','AFR', 'EUR','CHI'), Mean_pEUR=c(19.9,1,17.5,1,NA), N_total=c(8808,6775,1596,7233,1496),Females=c(63.3,39.6,62.7,57.4,62.5),N_train=c(6166,4744,682,3099,226), N_test=c(2642,2031,1822,8781,1270))
-#knitr::kable(dt2, caption="Table 2. Test cohorts")
-my_table2<-datatable(dt2,options = list(pageLength = 12), caption="Table 2. Test cohorts")
-my_table2
-```
-
 
 ### PRS calculations
 
@@ -222,14 +214,17 @@ my_table3
 ```{r, chunk='R2_table', out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 3: Partial-R2 for height PRS for different test cohorts and using different summary statistics and LDpred models "}
 dt=fread('ldpred_table.txt')[LDpred_model=='Inf']
 dt[,AIC:=round(AIC,1)]
-dt[,Train:=gsub('_train','', dt$Test)]
-dt$Train<-factor(dt$Train)
-data_long <- gather(dt, variable, value, -c(Train, Summary_Stats,LDpred_model,Test))
+#dt[,Train:=gsub('_train','', dt$Test)]
+#dt$Train<-factor(dt$Train)
+dt$Summary_Stats<-factor(dt$Summary_Stats)
+#data_long <- gather(dt, variable, value, -c(Train, Summary_Stats,LDpred_model,Test))
+data_long <- gather(dt, variable, value, -c(Summary_Stats,LDpred_model,Test))
 #dt2<-melt(dt, by=c('R2','AIC'))
-p2<-ggplot(dt, aes(x=Train, y=R2,color=Summary_Stats)) +
-geom_jitter(size=3, alpha=0.7, width=0.2) + 
+#p2<-ggplot(dt, aes(x=Train, y=R2,color=Summary_Stats)) +
+p2<-ggplot(dt, aes(x=Test, y=R2,color=Summary_Stats)) +
+geom_jitter(size=5, alpha=0.9, width=0.2) + 
 #facet_wrap(~variable, nrow=2, scales='free')  +     
-scale_color_manual(name='',values = wes_palette("Moonrise3",3), labels=c('BBJ_eas','meta-AFR','UKBB_eur')) + 
+scale_color_manual(name='',values = wes_palette("Moonrise3",4), labels=c('BBJ_eas','meta-AFR','meta-ALL','UKBB_eur')) + 
 #scale_shape_manual(name = "LDpred Model", labels = c("Infinitesimal", "p=1", "p=0.3")) +
 theme_bw()+ labs(title="")
 ggplotly(p2)
