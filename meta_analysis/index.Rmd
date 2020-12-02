@@ -128,7 +128,7 @@ my_table
 
 
 ```{r, echo=F}
-dt2<-data.table(Datasets=c('meta-AFR', 'meta-ALL'), Lambda=c(NA,NA),  TotalSampleSize=c(),SampleSizeThresh=c(90000,590000), N_pos_QC=c(2959565, 2298328))
+dt2<-data.table(Datasets=c('meta-AFR', 'meta-ALL'), Lambda=c(1.02,"-"),  TotalSampleSize=c(),SampleSizeThresh=c(90000,590000), N_pos_QC=c(2959565, 2298328))
 my_table2<-datatable(dt2,options = list(pageLength = 12), caption="Table 2. Meta-analyses")
 my_table2
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
@@ -147,7 +147,6 @@ my_table4<-datatable(dt4,options = list(pageLength = 12), caption="Table 4. Test
 my_table4
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
 ```
-
 
 ```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 1: QQ-plot for meta-AFR. P-values were GC corrected within each dataset, but not the final meta-AFR analysis. Based on the lambda value show here, downstream analyses referred to corrected final p-values."}
 knitr::include_graphics("qqplot.png")
@@ -205,26 +204,28 @@ $$height~Sex+Age+Age2+pEUR+PRS_{eur}$$
 
 ```{r, echo=F, chunk='ldpred_table'}
 dt=fread('ldpred_table.txt')
-dt[,AIC:=round(AIC,1)]
+#dt[,AIC:=round(AIC,1)]
 my_table3<-datatable(dt,options = list(pageLength = 12),caption="Table 3. LDpred models")
 #knitr::kable(dt)
 my_table3
 ```
 
 ```{r, chunk='R2_table', out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 3: Partial-R2 for height PRS for different test cohorts and using different summary statistics and LDpred models "}
-dt=fread('ldpred_table.txt')[LDpred_model=='Inf']
-dt[,AIC:=round(AIC,1)]
+dt=fread('ldpred_table.txt')
+#dt[,AIC:=round(AIC,1)]
 #dt[,Train:=gsub('_train','', dt$Test)]
 #dt$Train<-factor(dt$Train)
 dt$Summary_Stats<-factor(dt$Summary_Stats)
 #data_long <- gather(dt, variable, value, -c(Train, Summary_Stats,LDpred_model,Test))
-data_long <- gather(dt, variable, value, -c(Summary_Stats,LDpred_model,Test))
+#data_long <- gather(dt, variable, value, -c(Summary_Stats,LDpred_model,Test))
 #dt2<-melt(dt, by=c('R2','AIC'))
 #p2<-ggplot(dt, aes(x=Train, y=R2,color=Summary_Stats)) +
-p2<-ggplot(dt, aes(x=Test, y=R2,color=Summary_Stats)) +
+library(forcats)
+p2<-dt %>% mutate(Test = fct_reorder(Test,pEUR)) %>%
+ggplot(aes(x=Test, y=R2,color=Summary_Stats, Group=pEUR)) +
 geom_jitter(size=5, alpha=0.9, width=0.2) + 
 #facet_wrap(~variable, nrow=2, scales='free')  +     
-scale_color_manual(name='',values = wes_palette("Moonrise3",4), labels=c('BBJ_eas','meta-AFR','meta-ALL','UKBB_eur')) + 
+scale_color_manual(name='',values = wes_palette("Moonrise2",4), labels=c('BBJ_eas','meta-AFR','meta-ALL','UKBB_eur')) + 
 #scale_shape_manual(name = "LDpred Model", labels = c("Infinitesimal", "p=1", "p=0.3")) +
 theme_bw()+ labs(title="")
 ggplotly(p2)
