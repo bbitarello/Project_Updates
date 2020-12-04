@@ -231,7 +231,7 @@ ggplot(aes(x=Test, y=R2,color=Summary_Stats, Group=pEUR)) +
 geom_point(size=2, alpha=0.9, width=0.2, position=position_dodge(width=0.5)) + 
 geom_errorbar(aes(ymin=CI_L, ymax=CI_U), width=0.1, linetype = "dotted",position=position_dodge(width=0.5)) +        
 scale_color_manual(name='',values = wes_palette("Moonrise2",4), labels=c('BBJ_eas','meta-AFR','meta-ALL','UKBB_eur')) + 
-theme_bw()+ labs(ylab="Variance explained (%)", title="")
+theme_bw()+ labs(x="Test Dataset",y="Variance explained (%)", title="")
 ggplotly(p2)
 
 ```
@@ -239,14 +239,11 @@ ggplotly(p2)
 
 ```{r, chunk='PRS1_2_figure',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 5: Linear combinations of PRS for PMBB_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alpha=0. Anc2 is the ancestry of the second PRS component."}
 dt3=fread('PRS1_2_table.txt')
-for (I in c('pmbb_afr', 'hrs_afr', 'chi')){
+for (I in c('pmbb_afr', 'hrs_afr', 'chi', 'hrs_eur', 'pmbb_eur')){
 my_plot<-paste0(paste0('plot_', I),c('_1', '_2')) 
 dt2<-dt3[Train==I]
 dt2$Model<-factor(dt2$Model)
-dt2[,Base_Rsq:=ifelse(Model=='LDpred-Inf',
-max(dt2[Model=='LDpred-Inf' & Alpha==0.00]$R_sq),
-ifelse(Model=='LDpred-p1', 
-max(dt2[Model=='LDpred-p1' & Alpha==0.00]$R_sq), max(dt2[Model=='LDpred-p03' & Alpha==0.00]$R_sq)))]
+dt2[,Base_Rsq:=max(dt2[Model=='LDpred-Inf' & Alpha==0.00]$R_sq)]
 dt2[,R_sq_fold:=R_sq/Base_Rsq]
 p1<-ggplot(dt2, aes(x=Alpha, y=R_sq,color=Test)) +
 geom_line(size=0.9,) + 
