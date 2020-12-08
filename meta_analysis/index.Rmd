@@ -239,7 +239,7 @@ ggplotly(p2)
 
 ```{r, chunk='PRS1_2_figure',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 5: Linear combinations of PRS for PMBB_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alpha=0. Anc2 is the ancestry of the second PRS component."}
 dt3=fread('PRS1_2_table.txt')
-for (I in c('pmbb_afr', 'hrs_afr', 'chi', 'hrs_eur', 'pmbb_eur')){
+for (I in c('pmbb_afr_train', 'hrs_afr_prep', 'chi_prep', 'hrs_eur_train', 'pmbb_eur_prep')){
 my_plot<-paste0(paste0('plot_', I),c('_1', '_2')) 
 dt2<-dt3[Train==I]
 dt2$Model<-factor(dt2$Model)
