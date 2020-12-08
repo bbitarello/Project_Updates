@@ -120,7 +120,7 @@ dt<-data.table(
         Ancestries=c("European","African","African, African + European","African, Hispanic, European and others", "Japanese", "African+European"),
         Total=c(360388,14126,20427,49839,159095, 6556),
         Total_AFR=c(0,14126,20427,17299, 0,6556))
-dt[,Total_other:=Total-Total_AFR] [,N_SNPs:=c(11941213,24704819,3166314,25887135,25376652,20512513)][,N_SNPs_QC:=c(11939557,NA,NA,NA,15477000,NA)]
+dt[,Total_other:=Total-Total_AFR] [,N_SNPs:=c(11941213,24737979,3162541,25887135,25763247,6669728)][,N_SNPs_QC:=c(11939557,NA,NA,NA,15477000,NA)]
 my_table<-datatable(dt,options = list(pageLength = 12), caption="Table 1. Summary statistics used in this study.")
 my_table
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
@@ -128,7 +128,7 @@ my_table
 
 
 ```{r, echo=F}
-dt2<-data.table(Datasets=c('meta-AFR', 'meta-ALL'), Lambda=c(1.02,"-"),  TotalSampleSize=c(),SampleSizeThresh=c(90000,590000), N_pos_QC=c(2959565, 2298328))
+dt2<-data.table(Datasets=c('meta-AFR', 'meta-ALL'), Lambda=c(1.219,1.7),  TotalSampleSize=c(),SampleSizeThresh=c(90000,590000), N_pos_QC=c(2959565, 2298328))
 my_table2<-datatable(dt2,options = list(pageLength = 12), caption="Table 2. Meta-analyses")
 my_table2
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
