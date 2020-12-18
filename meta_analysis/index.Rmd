@@ -153,28 +153,51 @@ my_table4
 knitr::include_graphics("QC_HEIGHT_META_AFR_hg38_GC_qqplot.png")
 ```
 
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 2: QQ-plot for meta-AFR. P-values were GC corrected within each dataset, and for the final meta-AFR analysis."}
+knitr::include_graphics("QC_HEIGHT_META_AFR2_hg38_GC_qqplot.png")
+```
 
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 2: QQ-plot for meta-ALL. P-values were GC corrected within each dataset, and for the final meta-ALL analysis."}
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 3: QQ-plot for meta-ALL. P-values were GC corrected within each dataset, and for the final meta-ALL analysis."}
 knitr::include_graphics("QC_HEIGHT_META_ALL_hg38_GC_qqplot.png")
 ```
 
 
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 3: QQ-plot for UKBB."}
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 4: QQ-plot for UKBB."}
 knitr::include_graphics("QC_HEIGHT_UKBB_hg38_GC_qqplot.png")
 ```
 
 
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 4: QQ-plot for BBJ."}
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 5: QQ-plot for BBJ."}
 knitr::include_graphics("QC_HEIGHT_BBJ_hg38_GC_qqplot.png")
 ```
 
-
-```{r, out.width = "760px",echo=FALSE, eval=T, fig.cap="Fig 5: Manhattan plot for meta-AFR GWAS (top) and UKBB_EUR (bottom, for comparison). Genome-wide significance line is plotted at P=1e-08. SNPs above that threshold are plotted in red (49 and 3,308  SNPs for meta-AFR and UKBB_Eur, respectively). SNPs above threshold in both meta-AFR and UKBB_eur GWAS are plotted in orange (8 SNPs). SNPs were clumped prior to plotting (P<=5e-04, 100Kb window)."}
-#knitr::include_graphics("qqman_ggplot_comparison.png")
-
-
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 6: UKBB-BBJ comparison"}
+knitr::include_graphics("UKBB_BBJ_ss_panel.png")
 ```
 
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 7: UKBB-metaAFR comparison"}
+knitr::include_graphics("UKBB_META_AFR_ss_panel.png")
+```
+
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 8: UKBB-metaAFR2 comparison"}
+knitr::include_graphics("UKBB_META_AFR2_ss_panel.png")
+```
+
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 9: UKBB-metaALL comparison"}
+knitr::include_graphics("UKBB_META_ALL_ss_panel.png")
+```
+
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 10: metaAFR-metaALL comparison"}
+knitr::include_graphics("META_AFR_META_ALL_ss_panel.png")
+```
+
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 11: metaAFR2-metaALL comparison"}
+knitr::include_graphics("META_AFR2_META_ALL_ss_panel.png")
+```
+
+```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 10: metaAFR-metaAFR2 comparison"}
+knitr::include_graphics("META_AFR_META_AFR2_ss_panel.png")
+```
 
 ## Test cohorts
 
@@ -221,7 +244,7 @@ $$height~Sex+Age+Age2+pEUR+PRS_{eur}$$
 3) PRS2_BD - linear combination of PRS described in Bitarello & Mathieson 2020
 
 ```{r, echo=F, chunk='ldpred_table_radius500'}
-dt=fread('ldpred_table.txt')
+dt=fread('ldpred_table_radius500.txt')
 #dt[,AIC:=round(AIC,1)]
 my_table3<-datatable(dt,options = list(pageLength = 12),caption="Table 3. Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Bootrstrap confidence intervals (n=1,000)")
 #knitr::kable(dt)
@@ -248,7 +271,7 @@ p2<-dt %>% mutate(Test = fct_reorder(Test,pEUR)) %>%
 ggplot(aes(x=Test, y=R2,color=Summary_Stats, Group=pEUR)) +
 geom_point(size=2, alpha=0.9, width=0.2, position=position_dodge(width=0.5)) + 
 geom_errorbar(aes(ymin=CI_L, ymax=CI_U), width=0.1, linetype = "dotted",position=position_dodge(width=0.5)) +        
-scale_color_manual(name='',values = wes_palette("Moonrise2",4), labels=c('BBJ_eas','meta-AFR','meta-ALL','UKBB_eur')) + 
+scale_color_manual(name='',values = wes_palette("Cavalcanti1",5), labels=c('BBJ_eas','meta-AFR','meta-ALL','UKBB_eur')) + 
 theme_bw()+ labs(x="Test Dataset",y="Variance explained (%)", title="")
 ggplotly(p2)
 
@@ -256,70 +279,59 @@ ggplotly(p2)
 
 
 ```{r, chunk='PRS1_2_figure',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 5: Linear combinations of PRS for PMBB_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alpha=0. Anc2 is the ancestry of the second PRS component."}
-dt3=fread('PRS1_2_table.txt')
-for (I in c('pmbb_afr', 'hrs_afr', 'chi', 'hrs_eur', 'pmbb_eur')){
-my_plot<-paste0(paste0('plot_', I),c('_1', '_2')) 
-dt2<-dt3[Train==I]
-dt2$Model<-factor(dt2$Model)
-dt2[,Base_Rsq:=max(dt2[Model=='LDpred-Inf' & Alpha==0.00]$R_sq)]
-dt2[,R_sq_fold:=R_sq/Base_Rsq]
-p1<-ggplot(dt2, aes(x=Alpha, y=R_sq,color=Test)) +
-geom_line(size=0.9,) + 
-facet_grid(scales='free', vars(Model), vars(Anc2))  +     
-scale_color_manual(name='',values = wes_palette("GrandBudapest2",2)) + 
-theme_bw()+ labs(title="")
-p2<-ggplot(dt2, aes(x=Alpha, y=R_sq_fold,color=Test)) +
-geom_line(size=0.9,) + 
-geom_hline(yintercept=1, col='darkgray',lty=2)+        
-facet_grid(scales='free', vars(Model), vars(Anc2))  +     
-scale_color_manual(name='',values = wes_palette("GrandBudapest2",2)) + 
-theme_bw()+ labs(title="")
-assign(my_plot[1],p1)
-assign(my_plot[2],p2)
-cat(paste0('the winner for ', I,' is:\n'))
-print(dt2[which.max(dt2$R_sq),])
-}
-ggplotly(plot_pmbb_afr_2)
+#dt3=fread('PRS1_2_table.txt')
+#for (I in c('pmbb_afr', 'hrs_afr', 'chi', 'hrs_eur', 'pmbb_eur')){
+#my_plot<-paste0(paste0('plot_', I),c('_1', '_2')) 
+#dt2<-dt3[Train==I]
+#dt2$Model<-factor(dt2$Model)
+#dt2[,Base_Rsq:=max(dt2[Model=='LDpred-Inf' & Alpha==0.00]$R_sq)]
+#dt2[,R_sq_fold:=R_sq/Base_Rsq]
+#p1<-ggplot(dt2, aes(x=Alpha, y=R_sq,color=Test)) +
+#geom_line(size=0.9,) + 
+#facet_grid(scales='free', vars(Model), vars(Anc2))  +     
+#scale_color_manual(name='',values = wes_palette("GrandBudapest2",2)) + 
+#theme_bw()+ labs(title="")
+#p2<-ggplot(dt2, aes(x=Alpha, y=R_sq_fold,color=Test)) +
+#geom_line(size=0.9,) + 
+#geom_hline(yintercept=1, col='darkgray',lty=2)+        
+#facet_grid(scales='free', vars(Model), vars(Anc2))  +     
+#scale_color_manual(name='',values = wes_palette("GrandBudapest2",2)) + 
+#theme_bw()+ labs(title="")
+#assign(my_plot[1],p1)
+#assign(my_plot[2],p2)
+#cat(paste0('the winner for ', I,' is:\n'))
+#print(dt2[which.max(dt2$R_sq),])
+#}
+#ggplotly(plot_pmbb_afr_2)
 ```
 
 
-```{r, chunk='PRS1_2_figure5',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 6: Linear combinations of PRS for PMBB_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
+#```{r, chunk='PRS1_2_figure5',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 6: Linear combinations of PRS for PMBB_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
 
-ggplotly(plot_pmbb_afr_1)
-```
-
-
-
-```{r, chunk='PRS1_2_figure6',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 6: Linear combinations of PRS for HRS_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alfa=0. Anc2 is the ancestry of the second PRS component."}
-ggplotly(plot_hrs_afr_2)
-```
+#ggplotly(plot_pmbb_afr_1)
+#```
 
 
 
-```{r,out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 7: Linear combinations of PRS for HRS_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
-ggplotly(plot_hrs_afr_1)
-```
+#```{r, chunk='PRS1_2_figure6',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 6: Linear combinations of PRS for HRS_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alfa=0. Anc2 is the ancestry of the second PRS component."}
+#ggplotly(plot_hrs_afr_2)
+#```
 
 
 
-```{r, chunk='PRS1_2_figure8', out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 8: Linear combinations of PRS for UKB_CHI. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alpha=0. Anc2 is the ancestry of the second PRS component."}
-ggplotly(plot_chi_2)
-```
+#```{r,out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 7: Linear combinations of PRS for HRS_afr. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
+#ggplotly(plot_hrs_afr_1)
+#```
 
 
 
-```{r, chunk='PRS1_2_figure9',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 9: Linear combinations of PRS for UKB_CHI. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
-ggplotly(plot_chi_1)
-```
+#```{r, chunk='PRS1_2_figure8', out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 8: Linear combinations of PRS for UKB_CHI. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Fold increase relative to alpha=0. Anc2 is the ancestry of the second PRS component."}
+#ggplotly(plot_chi_2)
+#```
 
-## PRS1 and PRS2 discussion:
 
-Conclusions:
 
-Optimized tuning occurs for $\alpha=0.695$ for both PRS1 and PRS2 using 'AFR' as the second ancestry.
+#```{r, chunk='PRS1_2_figure9',out.height = "760px",out.width="560px",echo=FALSE, eval=T, fig.cap="Fig 9: Linear combinations of PRS for UKB_CHI. PRS1_ML, described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020. PRS2_BM, described in Bitarello & Mathieson 2020. Absolute values. Anc2 is the ancestry of the second PRS component."}
+#ggplotly(plot_chi_1)
+#```
 
-For PRS1_ML: Under these parameters, we see a 1.62 and 1.65 fold increase from PRS_eur and PRS_afr respectively.
-
-For PRS1_ML: Under these parameters, we see a 1.65 and 1.15 fold increase from PRS_eur and PRS_afr respectively.
-
-[ongoing...]
