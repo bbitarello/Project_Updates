@@ -243,9 +243,9 @@ $$height~Sex+Age+Age2+pEUR+PRS_{eur}$$
 
 3) PRS2_BD - linear combination of PRS described in Bitarello & Mathieson 2020
 
-```{r, echo=F, chunk='ldpred_table_radius500'}
-dt=fread('ldpred_table_radius500.txt')
-#dt[,AIC:=round(AIC,1)]
+```{r, echo=F, chunk='ldpred_table_radius1000'}
+dt=fread('ldpred_table_radius1000.txt')
+#dt[,AIC:=round(AIC,1)] 7/4
 my_table3<-datatable(dt,options = list(pageLength = 12),caption="Table 3. Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Bootrstrap confidence intervals (n=1,000)")
 #knitr::kable(dt)
 my_table3
@@ -257,7 +257,7 @@ my_table3
 ```
 
 ```{r, chunk='R2_table', out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 5: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Bootrstrap confidence intervals (n=1,000)"}
-dt=fread('ldpred_table_radius500.txt')
+dt=fread('ldpred_table_radius1000.txt')
 #dt[,AIC:=round(AIC,1)]
 #dt[,Train:=gsub('_train','', dt$Test)]
 #dt$Train<-factor(dt$Train)
@@ -271,7 +271,7 @@ p2<-dt %>% mutate(Test = fct_reorder(Test,pEUR)) %>%
 ggplot(aes(x=Test, y=R2,color=Summary_Stats, Group=pEUR)) +
 geom_point(size=2, alpha=0.9, width=0.2, position=position_dodge(width=0.5)) + 
 geom_errorbar(aes(ymin=CI_L, ymax=CI_U), width=0.1, linetype = "dotted",position=position_dodge(width=0.5)) +        
-scale_color_manual(name='',values = wes_palette("Cavalcanti1",5), labels=c('BBJ_eas','meta-AFR','meta-ALL','UKBB_eur')) + 
+scale_color_manual(name='',values = wes_palette("Cavalcanti1",5), labels=c('BBJ_eas','meta-AFR','meta-AFR2', 'meta-ALL','UKBB_eur')) + 
 theme_bw()+ labs(x="Test Dataset",y="Variance explained (%)", title="")
 ggplotly(p2)
 
