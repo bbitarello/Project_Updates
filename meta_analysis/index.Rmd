@@ -269,9 +269,9 @@ dt$Summary_Stats<-factor(dt$Summary_Stats)
 library(forcats)
 p2<-dt %>% mutate(Test = fct_reorder(Test,pEUR)) %>%
 ggplot(aes(x=Test, y=R2,color=Summary_Stats, Group=pEUR)) +
-geom_point(size=2, alpha=0.9, width=0.2, position=position_dodge(width=0.5)) + 
+geom_point(size=5, alpha=0.9, width=0.5, position=position_dodge(width=0.5)) + 
 geom_errorbar(aes(ymin=CI_L, ymax=CI_U), width=0.1, linetype = "dotted",position=position_dodge(width=0.5)) +        
-scale_color_manual(name='',values = wes_palette("Cavalcanti1",5), labels=c('BBJ_eas','meta-AFR','meta-AFR2', 'meta-ALL','UKBB_eur')) + 
+scale_color_manual(name='',values = wes_palette("Cavalcanti1",5), labels=c('BBJ_eas, N=','meta-AFR','meta-AFR2', 'meta-ALL','UKBB_eur')) + 
 theme_bw()+ labs(x="Test Dataset",y="Variance explained (%)", title="")
 ggplotly(p2)
 
