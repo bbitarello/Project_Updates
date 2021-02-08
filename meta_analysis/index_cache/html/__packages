@@ -7,16 +7,13 @@ tidyr
 readr
 ggplot2
 captioner
-BiocGenerics
-Biobase
-GWASTools
 qqman
 bigstatsr
 bigsnpr
 kableExtra
 wesanderson
 rmarkdown
+manhattanly
 plotly
 Cairo
 forcats
-manhattanly
