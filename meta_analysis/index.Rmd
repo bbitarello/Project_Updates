@@ -68,9 +68,7 @@ my_table4
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
 ```
 
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 1: QQ-plot for meta-AFR. P-values were GC corrected within each dataset, and for the final meta-AFR analysis."}
-knitr::include_graphics("QC_HEIGHT_META_AFR_hg38_GC_qqplot.png")
-```
+
 
 ```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 2: QQ-plot for meta-AFR. P-values were GC corrected within each dataset, and for the final meta-AFR analysis."}
 knitr::include_graphics("QC_HEIGHT_META_AFR2_hg38_GC_qqplot.png")
