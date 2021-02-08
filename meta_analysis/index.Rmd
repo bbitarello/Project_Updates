@@ -28,6 +28,26 @@ library('Cairo')
 knitr::opts_chunk$set(cache=TRUE, error=FALSE, fig.cap = " ", message=FALSE, warning=FALSE)
 ```
 
+```{r, chunk='R2_table', out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 5: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Bootrstrap confidence intervals (n=1,000)"}
+dt=fread('ldpred_table_radius1000.txt')
+#dt[,AIC:=round(AIC,1)]
+#dt[,Train:=gsub('_train','', dt$Test)]
+#dt$Train<-factor(dt$Train)
+dt$Summary_Stats<-factor(dt$Summary_Stats)
+#data_long <- gather(dt, variable, value, -c(Train, Summary_Stats,LDpred_model,Test))
+#data_long <- gather(dt, variable, value, -c(Summary_Stats,LDpred_model,Test))
+#dt2<-melt(dt, by=c('R2','AIC'))
+#p2<-ggplot(dt, aes(x=Train, y=R2,color=Summary_Stats)) +
+library(forcats)
+p2<-dt %>% mutate(Test = fct_reorder(Test_Data,pEUR)) %>% mutate(Summary_Stats=fct_reorder(Summary_Stats, R2)) %>%
+ggplot(aes(x=Test, y=R2,color=Summary_Stats, Group=pEUR)) +
+geom_point(size=4, alpha=0.7, width=0.4, position=position_dodge(width=0.5)) + 
+geom_errorbar(aes(ymin=CI_L, ymax=CI_U), width=0.1, linetype = "dotted",position=position_dodge(width=0.5)) +        
+scale_color_manual(name='',values = c(wes_palette("Royal2",5),wes_palette("Darjeeling1",5))) + 
+theme_bw()+ labs(x="Test Dataset",y="Variance explained (%)", title="")
+ggplotly(p2)
+
+```
 
 
 ```{r, echo=F}
@@ -112,26 +132,6 @@ my_table3
 
 ```
 
-```{r, chunk='R2_table', out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 5: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Bootrstrap confidence intervals (n=1,000)"}
-dt=fread('ldpred_table_radius1000.txt')
-#dt[,AIC:=round(AIC,1)]
-#dt[,Train:=gsub('_train','', dt$Test)]
-#dt$Train<-factor(dt$Train)
-dt$Summary_Stats<-factor(dt$Summary_Stats)
-#data_long <- gather(dt, variable, value, -c(Train, Summary_Stats,LDpred_model,Test))
-#data_long <- gather(dt, variable, value, -c(Summary_Stats,LDpred_model,Test))
-#dt2<-melt(dt, by=c('R2','AIC'))
-#p2<-ggplot(dt, aes(x=Train, y=R2,color=Summary_Stats)) +
-library(forcats)
-p2<-dt %>% mutate(Test = fct_reorder(Test_Data,pEUR)) %>% mutate(Summary_Stats=fct_reorder(Summary_Stats, R2)) %>%
-ggplot(aes(x=Test, y=R2,color=Summary_Stats, Group=pEUR)) +
-geom_point(size=4, alpha=0.7, width=0.4, position=position_dodge(width=0.5)) + 
-geom_errorbar(aes(ymin=CI_L, ymax=CI_U), width=0.1, linetype = "dotted",position=position_dodge(width=0.5)) +        
-scale_color_manual(name='',values = c(wes_palette("Royal2",5),wes_palette("Darjeeling1",5))) + 
-theme_bw()+ labs(x="Test Dataset",y="Variance explained (%)", title="")
-ggplotly(p2)
-
-```
 
 
 # Background
