@@ -25,21 +25,37 @@ library(rmarkdown)
 library('manhattanly')
 library(plotly)
 library('Cairo')
+library(forcats)
 knitr::opts_chunk$set(cache=TRUE, error=FALSE, fig.cap = " ", message=FALSE, warning=FALSE)
+
 ```
 
 ```{r, chunk='R2_table', out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Bootrstrap confidence intervals (n=1,000)"}
 dt=fread('ldpred_table_radius1000.txt')
-dt[,N:=ifelse(Summary_Stats=='PRS_UKBB',360388, ifelse(Summary_Stats=='PRS_BBJ',159095, ifelse(Summary_Stats=='PRS_PAGE',49781, ifelse(Summary_Stats=='PRS_GIANT', "50003-253280", ifelse(Summary_Stats=='PRS_META_AFR', 41109, ifelse(Summary_Stats=='PRS_META_AFR2',"84334-90890", ifelse(Summary_Stats=='PRS_META_NEA', "208876-249985", ifelse(Summary_Stats=="PRS_META_EUR", "410391-613667", ifelse(Summary_Stats=="PRS_META_ALL", "410169-610373", "660001-660019")))))))))]
-dt$Summary_Stats<-factor(dt$Summary_Stats)
-library(forcats)
-p2<-dt %>% mutate(Test = fct_reorder(Test_Data,pEUR)) %>% mutate(Summary_Stats=fct_reorder(Summary_Stats, N)) %>%
-ggplot(aes(x=Test, y=R2,color=Summary_Stats, Group=pEUR)) +
-geom_point(size=4, alpha=0.7, width=0.4, position=position_dodge(width=0.5)) + 
-geom_errorbar(aes(ymin=CI_L, ymax=CI_U), width=0.1, linetype = "dotted",position=position_dodge(width=0.5)) +        
-scale_color_manual(name='',values = c(wes_palette("Royal2",5),wes_palette("Darjeeling1",5))) + 
-theme_bw()+ labs(x="Test Dataset",y="Variance explained (%)", title="", cex=3)
-ggplotly(p2)
+dt[,N:=ifelse(Summary_Stats=='PRS_UKBB',360388, ifelse(Summary_Stats=='PRS_BBJ',159095, ifelse(Summary_Stats=='PRS_PAGE',49781, ifelse(Summary_Stats=='PRS_GIANT', 253280, ifelse(Summary_Stats=='PRS_META_AFR', 41109, ifelse(Summary_Stats=='PRS_META_AFR2',90890, ifelse(Summary_Stats=='PRS_META_NEA', 249985, ifelse(Summary_Stats=="PRS_META_EUR", 613667, ifelse(Summary_Stats=="PRS_META_ALL", 610373, 660019)))))))))]
+#
+dt[,Label:=ifelse(Summary_Stats=='PRS_META_AFR2', "META_AFR+PAGE", ifelse(Summary_Stats=="PRS_META_ALL", "UKBB+BBJ+META_AFR+PAGE", ifelse(Summary_Stats=="PRS_META_ALL2", "UKBB+GIANT+BBJ+META_AFR+PAGE", ifelse(Summary_Stats=="PRS_META_NEA", "META_AFR+PAGE+BBJ", ifelse(Summary_Stats=="PRS_META_EUR", "UKBB+GIANT", gsub("PRS_","", Summary_Stats))))))]
+
+dt[,Size_group:=ifelse(N<50000, "<50K", ifelse(N<100000,"<100K", ifelse(N<200000, "<200K", ifelse(N<300000, "<300K",ifelse(N<400000, "<400K", ifelse(N<600000, "<600K", ">600K"))))))]
+
+dt[,Label:=paste0(Label, ",", Size_group)]
+dt$Label<-factor(dt$Label)
+dt<-dt %>% mutate(Label=fct_reorder(Label, N))
+dt[,R2:=round(R2,2)]
+dt[,pEUR:=round(pEUR,2)]
+set.seed(129)
+cols<-sample(unique(unlist(wesanderson::wes_palettes)),9)
+cols<-c(cols[1:5],"#0C1707", cols[6:9])
+p2<-dt %>% select(R2:pEUR, Summary_Stats,Label, N, Size_group) %>%
+dplyr::mutate(Test_Data= fct_reorder(Test_Data,pEUR)) %>% mutate(Label=fct_reorder(Label, N)) %>%
+ggplot(aes(x=Test_Data, y=R2,color=Label, group=N)) +
+geom_point(size=3, alpha=0.8, position=position_dodge(width=0.6)) + 
+geom_errorbar(aes(ymin=CI_L, ymax=CI_U), width=0.1, linetype = "dotted",position=position_dodge(width=0.6)) +        
+scale_color_manual(name='Summary Statistics',values = cols) +
+theme_bw()+ labs(x="",y="Variance explained (%)", title="") +
+theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))
+ggplotly(p2) 
+#ggplotly(p2,tooltip=c('R2','N', 'pEUR', 'CI_L', 'CI_U'))
 
 ```
 
