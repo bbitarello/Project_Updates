@@ -30,7 +30,7 @@ knitr::opts_chunk$set(cache=TRUE, error=FALSE, fig.cap = " ", message=FALSE, war
 
 ```
 
-```{r, chunk='R2_table', out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Bootrstrap confidence intervals (n=1,000)"}
+```{r, chunk='R2_table', out.height = "460px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Bootrstrap confidence intervals (n=1,000)"}
 dt=fread('ldpred_table_radius1000.txt')
 dt[,N:=ifelse(Summary_Stats=='PRS_UKBB',360388, ifelse(Summary_Stats=='PRS_BBJ',159095, ifelse(Summary_Stats=='PRS_PAGE',49781, ifelse(Summary_Stats=='PRS_GIANT', 253280, ifelse(Summary_Stats=='PRS_META_AFR', 41109, ifelse(Summary_Stats=='PRS_META_AFR2',90890, ifelse(Summary_Stats=='PRS_META_NEA', 249985, ifelse(Summary_Stats=="PRS_META_EUR", 613667, ifelse(Summary_Stats=="PRS_META_ALL", 610373, 660019)))))))))]
 #
