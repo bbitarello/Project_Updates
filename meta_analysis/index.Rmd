@@ -27,35 +27,102 @@ library(plotly)
 library('Cairo')
 library(forcats)
 knitr::opts_chunk$set(cache=TRUE, error=FALSE, fig.cap = " ", message=FALSE, warning=FALSE)
+addline_format <- function(x,...){
+    gsub('\\s','\n',x)
+}
+library("ggvenn")
 
 ```
 
-```{r, chunk='R2_table', out.height = "460px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Bootrstrap confidence intervals (n=1,000)"}
-dt=fread('ldpred_table_radius1000.txt')
-dt[,N:=ifelse(Summary_Stats=='PRS_UKBB',360388, ifelse(Summary_Stats=='PRS_BBJ',159095, ifelse(Summary_Stats=='PRS_PAGE',49781, ifelse(Summary_Stats=='PRS_GIANT', 253280, ifelse(Summary_Stats=='PRS_META_AFR', 41109, ifelse(Summary_Stats=='PRS_META_AFR2',90890, ifelse(Summary_Stats=='PRS_META_NEA', 249985, ifelse(Summary_Stats=="PRS_META_EUR", 613667, ifelse(Summary_Stats=="PRS_META_ALL", 610373, 660019)))))))))]
-#
-dt[,Label:=ifelse(Summary_Stats=='PRS_META_AFR2', "META_AFR+PAGE", ifelse(Summary_Stats=="PRS_META_ALL", "UKBB+BBJ+META_AFR+PAGE", ifelse(Summary_Stats=="PRS_META_ALL2", "UKBB+GIANT+BBJ+META_AFR+PAGE", ifelse(Summary_Stats=="PRS_META_NEA", "META_AFR+PAGE+BBJ", ifelse(Summary_Stats=="PRS_META_EUR", "UKBB+GIANT", gsub("PRS_","", Summary_Stats))))))]
-
-dt[,Size_group:=ifelse(N<50000, "<50K", ifelse(N<100000,"<100K", ifelse(N<200000, "<200K", ifelse(N<300000, "<300K",ifelse(N<400000, "<400K", ifelse(N<600000, "<600K", ">600K"))))))]
+```{r, chunk='R2_table', out.height = "460px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Points are empirical estimtes, and error bars are bootrstrap standard errors (n=5,000)."}
+dt=fread('ldpred_table_radius1000_boots_5000.txt')
 
 dt[,Label:=paste0(Label, ",", Size_group)]
+dt[,Label2:=addline_format(paste0(Test, " (", Sample_N, ")" ))]
 dt$Label<-factor(dt$Label)
 dt<-dt %>% mutate(Label=fct_reorder(Label, N))
 dt[,R2:=round(R2,2)]
 dt[,pEUR:=round(pEUR,2)]
-set.seed(129)
-cols<-sample(unique(unlist(wesanderson::wes_palettes)),9)
-cols<-c(cols[1:5],"#0C1707", cols[6:9])
-p2<-dt %>% select(R2:pEUR, Summary_Stats,Label, N, Size_group) %>%
-dplyr::mutate(Test_Data= fct_reorder(Test_Data,pEUR)) %>% mutate(Label=fct_reorder(Label, N)) %>%
-ggplot(aes(x=Test_Data, y=R2,color=Label, group=N)) +
-geom_point(size=3, alpha=0.8, position=position_dodge(width=0.6)) + 
-geom_errorbar(aes(ymin=CI_L, ymax=CI_U), width=0.1, linetype = "dotted",position=position_dodge(width=0.6)) +        
+
+#from the wes anderson palette:
+cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20")
+#cols2<-sample(unlist(wes_palettes),14)
+p2<-dt %>% select(Summary_Stats:Sample_N, R2:Label2) %>%
+dplyr::mutate(Label2= fct_reorder(Label2,pEUR)) %>% mutate(Label=fct_reorder(Label, N)) %>%
+ggplot(aes(x=Label2, y=R2,color=Label, group=N, name=pEUR)) +
+geom_point(size=3, alpha=0.8, position=position_dodge(width=0.8)) +
+geom_errorbar(aes(ymin=R2+SE, ymax=R2-SE), width=0.05, linetype = "dotted",position=position_dodge(width=0.8)) +        
 scale_color_manual(name='Summary Statistics',values = cols) +
 theme_bw()+ labs(x="",y="Variance explained (%)", title="") +
 theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))
 ggplotly(p2) 
 #ggplotly(p2,tooltip=c('R2','N', 'pEUR', 'CI_L', 'CI_U'))
+
+```
+
+
+```{r}
+set.seed(4194)
+cols2<-unname(sample(unlist(wesanderson::wes_palettes),15))
+res1<-readRDS('resPRS1_ML.RDs')
+nams<-rownames(res1[[1]])
+nams2<-names(res1)
+res1<-lapply(1:5, function(x) as.data.table(as.data.frame(res1[[x]])))
+res1<-lapply(res1, function(x) x[,Set:=nams])
+res1<-lapply(1:5, function(x) res1[[x]][,Test_Data:=nams2[x]])
+res2<-do.call(rbind, res1)
+res3<-as.data.table(melt(res2, id.vars=c('Set', 'Test_Data')))
+res3[,Alpha:=as.numeric(gsub("alpha","",variable))]
+res3[,value:=round(value,1)]
+res3[,Set:=gsub("PRS_", "", Set)]
+do.call(rbind, (res3 %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 5L))))
+
+pA<-res3[Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')] %>% 
+        filter(Set %in% unique(do.call(rbind, (res3 %>% filter(Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')) %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 5L))))$Set)) %>% mutate(Set=fct_reorder(Set, value)) %>% ggplot(aes(x=Alpha, y=value, color=Set)) + facet_wrap(~Test_Data)+geom_line() + 
+        scale_color_manual(name='Summary Statistics',values = cols2[1:12])  + scale_y_continuous(breaks = seq(0, 20, by = 2)) + theme_bw()
+#
+res1<-readRDS('resPRS2_BM.RDs')
+nams<-rownames(res1[[1]])
+nams2<-names(res1)
+res1<-lapply(1:3, function(x) as.data.table(as.data.frame(res1[[x]])))
+res1<-lapply(res1, function(x) x[,Set:=nams])
+res1<-lapply(1:3, function(x) res1[[x]][,Test_Data:=nams2[x]])
+res2<-do.call(rbind, res1)
+res4<-as.data.table(melt(res2, id.vars=c('Set', 'Test_Data')))
+res4[,Alpha:=as.numeric(gsub("alpha","",variable))]
+res4[,value:=round(value,1)]
+res4[,Set:=gsub("PRS_", "", Set)]
+res4 %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 2L)) 
+
+pB<-res4 %>% 
+        filter(Set %in% unique(do.call(rbind, (res4 %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 5L))))$Set)) %>% mutate(Set=fct_reorder(Set, value)) %>% ggplot(aes(x=Alpha, y=value, color=Set)) + facet_wrap(~Test_Data)+geom_line() + 
+        scale_color_manual(name='Summary Statistics',values = cols2[1:12])  + scale_y_continuous(breaks = seq(0, 20, by = 2)) + theme_bw()
+
+res5<-bind_rows(res3[Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')] %>% 
+    filter(Set %in% unique(do.call(rbind, (res3 %>% filter(Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')) %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 4L))))$Set)) %>% mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS1"), res4 %>% 
+        filter(Set %in% unique(do.call(rbind, (res4 %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 4L))))$Set)) %>% mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS2"))
+#
+#pC<-cowplot::plot_grid(pA,pB, labels=c("PRS1", "PRS2"), nrow=2)
+pC<-ggplot(res5) + geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS)) + facet_wrap(~Test_Data, dir="h") +scale_color_manual(name='Summary Statistics',values = cols2[1:12])  + scale_y_continuous(breaks = seq(0, 20, by = 2)) + theme_bw()
+ggplotly(pC)
+```
+
+```{r, chunk='R2_table', out.height = "460px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 2: Venn Diagram"}
+library(cowplot)
+snp_IDS<-readRDS("all_snp_IDS.Rds")
+sss<-gsub("PRS_", "",levels((dt %>% mutate(Summary_Stats=fct_reorder(Summary_Stats, N)))[,Summary_Stats]))
+snp_IDS<-snp_IDS[sss]
+
+v1<-ggvenn(snp_IDS[c(2,4,6,7)], fill_color = cols[c(2,4,6,7)], stroke_size = 0.5, set_name_size = 5)
+
+ggplotly(v1)
+v2<-ggvenn(snp_IDS[c(6,7,9)], fill_color = cols[c(6,7,9)], stroke_size = 0.5, set_name_size = 5)
+ggplotly(v2)
+v3<-ggvenn(snp_IDS[c(2,3,4,5)], fill_color = cols[c(2,3,4,5)], stroke_size = 0.5, set_name_size = 5)
+ggplotly(v3)
+
+v4<-ggvenn(snp_IDS[c(3,4,5)], fill_color = cols[c(3,4,5)], stroke_size = 0.5, set_name_size = 5)
+#ggplotly(v4)
 
 ```
 
@@ -77,70 +144,6 @@ my_table4<-datatable(dt4,options = list(pageLength = 12), caption="Table 2. Test
 my_table4
 #knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
 ```
-
-
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 2: QQ-plot for meta-AFR. P-values were GC corrected within each dataset, and for the final meta-AFR analysis."}
-knitr::include_graphics("QC_HEIGHT_META_AFR2_hg38_GC_qqplot.png")
-```
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 3: QQ-plot for meta-ALL. P-values were GC corrected within each dataset, and for the final meta-ALL analysis."}
-knitr::include_graphics("QC_HEIGHT_META_ALL_hg38_GC_qqplot.png")
-```
-
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 4: QQ-plot for UKBB."}
-knitr::include_graphics("QC_HEIGHT_UKBB_hg38_GC_qqplot.png")
-```
-
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 5: QQ-plot for BBJ."}
-knitr::include_graphics("QC_HEIGHT_BBJ_hg38_GC_qqplot.png")
-```
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 6: UKBB-BBJ comparison"}
-knitr::include_graphics("UKBB_BBJ_ss_panel.png")
-```
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 7: UKBB-metaAFR comparison"}
-knitr::include_graphics("UKBB_META_AFR_ss_panel.png")
-```
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 8: UKBB-metaAFR2 comparison"}
-knitr::include_graphics("UKBB_META_AFR2_ss_panel.png")
-```
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 9: UKBB-metaALL comparison"}
-knitr::include_graphics("UKBB_META_ALL_ss_panel.png")
-```
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 10: metaAFR-metaALL comparison"}
-knitr::include_graphics("META_AFR_META_ALL_ss_panel.png")
-```
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 11: metaAFR2-metaALL comparison"}
-knitr::include_graphics("META_AFR2_META_ALL_ss_panel.png")
-```
-
-```{r, out.width = "360px",echo=FALSE, eval=T, fig.cap="Fig 10: metaAFR-metaAFR2 comparison"}
-knitr::include_graphics("META_AFR_META_AFR2_ss_panel.png")
-```
-
-
-```{r, echo=F, chunk='ldpred_table_radius1000'}
-dt=fread('ldpred_table_radius1000.txt')
-#dt[,AIC:=round(AIC,1)] 7/4
-my_table3<-datatable(dt,options = list(pageLength = 12),caption="Table 3. Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Bootrstrap confidence intervals (n=1,000)")
-#knitr::kable(dt)
-my_table3
-```
-```{r, chunk='R2_table', out.height = "460px",out.width="660px",echo=FALSE, eval=T, fig.cap="Fig 4: Manhattan plot"}
-#meta_afr<-fread('QC_HEIGHT_META_AFR_hg38.txt.gz')
-
-
-```
-
-
 
 # Background
 
