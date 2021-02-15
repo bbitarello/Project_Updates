@@ -34,10 +34,10 @@ library("ggvenn")
 
 ```
 
-```{r, chunk='R2_table', out.height = "460px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Points are empirical estimtes, and error bars are bootrstrap standard errors (n=5,000)."}
+```{r, chunk='Fig 1', out.height = "460px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Points are empirical estimtes, and error bars are bootrstrap standard errors (n=5,000)."}
 dt=fread('ldpred_table_radius1000_boots_5000.txt')
 
-dt[,Label:=paste0(Label, ",", Size_group)]
+dt[,Label:=paste0(Label, ";", N)]
 dt[,Label2:=addline_format(paste0(Test, " (", Sample_N, ")" ))]
 dt$Label<-factor(dt$Label)
 dt<-dt %>% mutate(Label=fct_reorder(Label, N))
@@ -61,7 +61,7 @@ ggplotly(p2)
 ```
 
 
-```{r}
+```{r, chunk='Fig2', out.height = "460px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3)."}
 set.seed(4194)
 cols2<-unname(sample(unlist(wesanderson::wes_palettes),15))
 res1<-readRDS('resPRS1_ML.RDs')
@@ -75,7 +75,7 @@ res3<-as.data.table(melt(res2, id.vars=c('Set', 'Test_Data')))
 res3[,Alpha:=as.numeric(gsub("alpha","",variable))]
 res3[,value:=round(value,1)]
 res3[,Set:=gsub("PRS_", "", Set)]
-do.call(rbind, (res3 %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 5L))))
+
 
 pA<-res3[Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')] %>% 
         filter(Set %in% unique(do.call(rbind, (res3 %>% filter(Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')) %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 5L))))$Set)) %>% mutate(Set=fct_reorder(Set, value)) %>% ggplot(aes(x=Alpha, y=value, color=Set)) + facet_wrap(~Test_Data)+geom_line() + 
@@ -92,39 +92,25 @@ res4<-as.data.table(melt(res2, id.vars=c('Set', 'Test_Data')))
 res4[,Alpha:=as.numeric(gsub("alpha","",variable))]
 res4[,value:=round(value,1)]
 res4[,Set:=gsub("PRS_", "", Set)]
-res4 %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 2L)) 
 
 pB<-res4 %>% 
         filter(Set %in% unique(do.call(rbind, (res4 %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 5L))))$Set)) %>% mutate(Set=fct_reorder(Set, value)) %>% ggplot(aes(x=Alpha, y=value, color=Set)) + facet_wrap(~Test_Data)+geom_line() + 
         scale_color_manual(name='Summary Statistics',values = cols2[1:12])  + scale_y_continuous(breaks = seq(0, 20, by = 2)) + theme_bw()
 
-res5<-bind_rows(res3[Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')] %>% 
-    filter(Set %in% unique(do.call(rbind, (res3 %>% filter(Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')) %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 4L))))$Set)) %>% mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS1"), res4 %>% 
-        filter(Set %in% unique(do.call(rbind, (res4 %>% group_by(Test_Data) %>% mutate(Test=Test_Data) %>% arrange(-value) %>% group_map(~head(.x, 4L))))$Set)) %>% mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS2"))
-#
+res5<-bind_rows(res3[Test_Data %in% c('PMBB_AFR', 'HRS_AFR')] %>% mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS1"), res4[Test_Data %in% c('PMBB_AFR', 'HRS_AFR')] %>%  mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS2")) %>% filter(Set %in% "UKBB--META_NEA") %>% as.data.table
+
+res5$Test_Data<-factor(res5$Test_Data, levels=c('UKB_CHI', 'HRS_AFR', 'PMBB_AFR'))
+res5[, variable:=NULL]
+res5[, Label:=ifelse(Test_Data=='HRS_AFR', addline_format(paste0(Test_Data, " (", 2241, ")")),addline_format(paste0(Test_Data, " (", 8673, ")")))]
+res5$Label<-factor(res5$Label)
+label1<-levels(res5$Label)
+
 #pC<-cowplot::plot_grid(pA,pB, labels=c("PRS1", "PRS2"), nrow=2)
-pC<-ggplot(res5) + geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS)) + facet_wrap(~Test_Data, dir="h") +scale_color_manual(name='Summary Statistics',values = cols2[1:12])  + scale_y_continuous(breaks = seq(0, 20, by = 2)) + theme_bw()
+pC<-ggplot(res5) + geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS)) + facet_wrap(~Test_Data, dir="h") +scale_color_manual(name='Summary Statistics',values = cols2[1:12])  + scale_y_continuous(breaks = seq(0, 10, by = 2)) + theme_bw() + labs(x="",y="Variance explained (%)", title="") + theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))
 ggplotly(pC)
 ```
 
-```{r, chunk='R2_table', out.height = "460px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 2: Venn Diagram"}
-library(cowplot)
-snp_IDS<-readRDS("all_snp_IDS.Rds")
-sss<-gsub("PRS_", "",levels((dt %>% mutate(Summary_Stats=fct_reorder(Summary_Stats, N)))[,Summary_Stats]))
-snp_IDS<-snp_IDS[sss]
 
-v1<-ggvenn(snp_IDS[c(2,4,6,7)], fill_color = cols[c(2,4,6,7)], stroke_size = 0.5, set_name_size = 5)
-
-#ggplotly(v1)
-v2<-ggvenn(snp_IDS[c(6,7,9)], fill_color = cols[c(6,7,9)], stroke_size = 0.5, set_name_size = 5)
-#ggplotly(v2)
-v3<-ggvenn(snp_IDS[c(2,3,4,5)], fill_color = cols[c(2,3,4,5)], stroke_size = 0.5, set_name_size = 5)
-#ggplotly(v3)
-
-v4<-ggvenn(snp_IDS[c(3,4,5)], fill_color = cols[c(3,4,5)], stroke_size = 0.5, set_name_size = 5)
-#ggplotly(v4)
-
-```
 
 
 ```{r, echo=F}
