@@ -115,11 +115,11 @@ snp_IDS<-snp_IDS[sss]
 
 v1<-ggvenn(snp_IDS[c(2,4,6,7)], fill_color = cols[c(2,4,6,7)], stroke_size = 0.5, set_name_size = 5)
 
-ggplotly(v1)
+#ggplotly(v1)
 v2<-ggvenn(snp_IDS[c(6,7,9)], fill_color = cols[c(6,7,9)], stroke_size = 0.5, set_name_size = 5)
-ggplotly(v2)
+#ggplotly(v2)
 v3<-ggvenn(snp_IDS[c(2,3,4,5)], fill_color = cols[c(2,3,4,5)], stroke_size = 0.5, set_name_size = 5)
-ggplotly(v3)
+#ggplotly(v3)
 
 v4<-ggvenn(snp_IDS[c(3,4,5)], fill_color = cols[c(3,4,5)], stroke_size = 0.5, set_name_size = 5)
 #ggplotly(v4)
