@@ -62,7 +62,7 @@ ggplotly(p2)
 ```
 
 
-```{r, chunk='Fig2', out.height = "560px",out.width="1160px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3)."}
+```{r, chunk='Fig2', out.height = "520px",out.width="1260px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3)."}
 set.seed(4194)
 cols2<-unname(sample(unlist(wesanderson::wes_palettes),15))
 res1<-readRDS('resPRS1_ML.RDs')
