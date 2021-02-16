@@ -61,7 +61,7 @@ ggplotly(p2)
 
 ```{r, echo=F}
 set.seed(418)
-cols2<-unname(sample(unlist(wesanderson::wes_palettes),2))
+cols2<-unname(sample(unlist(wesanderson::wes_palettes),3))
 res1<-readRDS('resPRS1_ML.RDs')
 nams<-rownames(res1[[1]])
 nams2<-names(res1)
@@ -100,21 +100,30 @@ label1<-levels(res5$Label)
 expnd<-rbind(data.table(Set=c("UKBB", "META_NEA"), Test_Data="HRS_AFR", value=c(5.54,5.28), Alpha=c(0,1), PRS="PRS", Label="HRS_AFR\n(2241)"), data.table(Set=c("META_EUR", "META_NEA"), Test_Data="HRS_AFR", value=c(6.13,5.28), Alpha=c(0,1), PRS="PRS", Label="HRS_AFR\n(2241)"),data.table(Set=c("UKBB","META_NEA"), Test_Data="PMBB_AFR", value=c(4.97,5.58), Alpha=c(0,1), PRS="PRS", Label="PMBB_AFR\n(8673)"), data.table(Set=c("META_EUR", "META_NEA"), Test_Data="PMBB_AFR", value=c(5.65,5.58), Alpha=c(0,1), PRS="PRS", Label="PMBB_AFR\n(8673)")) 
 
 
+prs3<-fread("PMBB_AFR_META_EUR_META_NEA_LocAnc.txt")
+prs3[,Set:="META_EUR--META_NEA"]
+
+setnames(prs3,c('Partial_Rsq'), c('value'))
+prs3[, PRS:="PRS3"][, Test_Data:="PMBB_AFR"][, Label:="PMBB_AFR\n(8673)"]
+prs3<-prs3[,.(Set, Test_Data, value, Alpha, PRS, Label)]
+res5<-rbind(res5, prs3)
+        
 pD<-ggplot(res5[Test_Data=="HRS_AFR"]) +
-geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=F) + geom_point(data=expnd[Test_Data=="HRS_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=2, col=cols[c(7,5,9)]) +
+geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=F) + geom_point(data=expnd[Test_Data=="HRS_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=2.5, col=cols[c(7,5,9)], alpha=c(0.8, 0.8, 0.8)) +
 scale_color_manual(values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 theme_bw() + 
 labs(x="Alpha",y="Variance explained (%)", title="") + theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))+
-         geom_text(data=expnd[Test_Data=="HRS_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(-0.1,-0.15, -0.2), check_overlap=T, size=3)
+         geom_text(data=expnd[Test_Data=="HRS_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(-0.1,-0.15, -0.2), check_overlap=T, size=c(3,3,3))
 
 pE<-ggplot(res5[Test_Data=="PMBB_AFR"]) +
 geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=F) + 
-        geom_point(data=expnd[Test_Data=="PMBB_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=2, col=cols[c(7,5,9)]) +
+        geom_point(data=expnd[Test_Data=="PMBB_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=2, col=cols[c(7,5,9)], alpha=c(0.8, 0.8, 0.8)) +
 scale_color_manual(values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 #facet_wrap(~Test_Data, dir="h") + 
 theme_bw() + 
 labs(x="Alpha",y="Variance explained (%)", title="") + theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))+
-        geom_text(data=expnd[Test_Data=="PMBB_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(0,-0.15, -0.2), check_overlap=T, size=3)
+        geom_text(data=expnd[Test_Data=="PMBB_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(0,-0.15, -0.2), check_overlap=T, size=c(3,3,3))
+
 ```
 
 ```{r, chunk='Fig3',out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).HRS_AFR"}
@@ -123,6 +132,15 @@ ggplotly(pD)
 
 ```{r, chunk='Fig3', out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 3: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).PMBB_AFR"}
 ggplotly(pE)
+```
+
+```{r, chunk='Fig4', out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: 1000 GENOMES"}
+g1000<-readRDS('g1000_1000g_ALL_LD_panel.Rds')
+samples<-fread("integrated_call_samples_v3.20130502.ALL.panel", fill=T, header=T)[,1:4]
+setnames(samples, 'sample', 'IID')
+setkey(samples, IID)
+lapply(1:10,function(x) g1000[[x]][,Summary_Stats:=names(g1000)[x]])
+g1000<-lapply(g1000, function(x) merge(x, samples, by="IID"))
 ```
 
 ```{r, echo=F}
