@@ -2,9 +2,6 @@
 title: "Height Meta-analysis for African ancestry"
 output:
   html_document:
-    df_print: 
-  pdf_document: default
-  html_notebook: default
   fig_caption: yes
 ---
 ```{r setup, include=F}
@@ -62,9 +59,9 @@ ggplotly(p2)
 ```
 
 
-```{r, chunk='Fig2', out.height = "520px",out.width="1260px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3)."}
-set.seed(4194)
-cols2<-unname(sample(unlist(wesanderson::wes_palettes),15))
+```{r, echo=F}
+set.seed(418)
+cols2<-unname(sample(unlist(wesanderson::wes_palettes),2))
 res1<-readRDS('resPRS1_ML.RDs')
 nams<-rownames(res1[[1]])
 nams2<-names(res1)
@@ -104,27 +101,29 @@ expnd<-rbind(data.table(Set=c("UKBB", "META_NEA"), Test_Data="HRS_AFR", value=c(
 
 
 pD<-ggplot(res5[Test_Data=="HRS_AFR"]) +
-geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=F) + geom_point(data=expnd[Test_Data=="HRS_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=1.8, col=cols[c(7,5,9)]) +
-scale_color_manual(name='',values = cols2[1:12]) + scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=F) + geom_point(data=expnd[Test_Data=="HRS_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=2, col=cols[c(7,5,9)]) +
+scale_color_manual(values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 theme_bw() + 
 labs(x="Alpha",y="Variance explained (%)", title="") + theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))+
-         geom_text(data=expnd[Test_Data=="HRS_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(0,-0.15, 0.4), check_overlap=T, size=3)
+         geom_text(data=expnd[Test_Data=="HRS_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(-0.1,-0.15, -0.2), check_overlap=T, size=3)
 
 pE<-ggplot(res5[Test_Data=="PMBB_AFR"]) +
-geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9) + 
-        geom_point(data=expnd[Test_Data=="PMBB_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=1.8, col=cols[c(7,5,9)]) +
-scale_color_manual(name='',values = cols2[1:12]) + scale_y_continuous(breaks = seq(0, 10, by = 2)) +
+geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=F) + 
+        geom_point(data=expnd[Test_Data=="PMBB_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=2, col=cols[c(7,5,9)]) +
+scale_color_manual(values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 #facet_wrap(~Test_Data, dir="h") + 
 theme_bw() + 
-labs(x="Alpha",y="", title="") + theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))+
-        geom_text(data=expnd[Test_Data=="PMBB_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(0,-0.15, 0.4), check_overlap=T, size=3)
-
-
-cowplot::plot_grid(pD,pE, nrow=1, labels=c("HRS_AFR", "PMBB_AFR"), rel_widths=c(0.4, 0.6))
+labs(x="Alpha",y="Variance explained (%)", title="") + theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))+
+        geom_text(data=expnd[Test_Data=="PMBB_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(0,-0.15, -0.2), check_overlap=T, size=3)
 ```
 
+```{r, chunk='Fig3',out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).HRS_AFR"}
+ggplotly(pD)
+```
 
-
+```{r, chunk='Fig3', out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 3: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).PMBB_AFR"}
+ggplotly(pE)
+```
 
 ```{r, echo=F}
 dt<-fread('ss_datasets.txt')
