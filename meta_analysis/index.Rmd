@@ -134,13 +134,36 @@ ggplotly(pD)
 ggplotly(pE)
 ```
 
-```{r, chunk='Fig4', out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: 1000 GENOMES"}
+```{r,echo=F}
+set.seed(125)
+cols3<-unname(sample(unlist(wesanderson::wes_palettes),5))
 g1000<-readRDS('g1000_1000g_ALL_LD_panel.Rds')
 samples<-fread("integrated_call_samples_v3.20130502.ALL.panel", fill=T, header=T)[,1:4]
+
+superpops<-unique(samples$super_pop)
 setnames(samples, 'sample', 'IID')
 setkey(samples, IID)
 lapply(1:10,function(x) g1000[[x]][,Summary_Stats:=names(g1000)[x]])
 g1000<-lapply(g1000, function(x) merge(x, samples, by="IID"))
+m1<-lapply(g1000, function(x) c(mean(x[super_pop=='EUR', PRS]), sd(x[super_pop=='EUR', PRS])))
+
+g1000<-lapply(1: length(g1000), function(x) g1000[[x]][,PRS_scaled:=scale(as.matrix(PRS), center=m1[[x]][[1]], scale=m1[[x]][[2]]), by=super_pop])
+g1000<-lapply(1: length(g1000), function(x) as.data.table(g1000[[x]]))
+g1000<-do.call(rbind, g1000)
+g1000[,Label:=ifelse(Summary_Stats=="META_EUR", "UKBB+GIANT", ifelse(Summary_Stats=="META_NEA", "META_AFR+PAGE+BBJ", ifelse(Summary_Stats=="META_AFR2", "META_AFR+PAGE", ifelse(Summary_Stats=="META_ALL", "UKBB+BBJ+META_AFR+PAGE", ifelse(Summary_Stats=="META_ALL2", "UKBB+GIANT+BBJ+META_AFR+PAGE", Summary_Stats)))))]
+
+ss_lab<-unlist(strsplit(levels(dt[,]$Label), ";"))[seq(from=1, to=20, by=2)]
+g1000$Label<-factor(g1000[, Label])
+levels(g1000$Label)<-ss_lab
+
+p1000<-ggplot(g1000, aes(x=PRS_scaled, fill=super_pop))+ facet_wrap(~Label,labeller = label_wrap_gen(width=2))+
+geom_density(alpha=0.6) + labs(x="Density",x="Scaled Polygenic Score", title="1000 Genomes")+
+theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))+
+scale_fill_manual(values=cols3, name="Populations")
+```
+
+```{r, chunk='Fig4', out.height = "660px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: 1000 GENOMES"}
+ggplotly(p1000)
 ```
 
 ```{r, echo=F}
