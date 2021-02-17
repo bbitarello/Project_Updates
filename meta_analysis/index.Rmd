@@ -180,11 +180,17 @@ theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), 
 scale_fill_manual(values=cols3, name="Populations") + xlim(c(-10,10)) + ylim(c(0,1.2))
 ```
 
-```{r, chunk='Fig4', out.height = "960px",out.width="860px",echo=FALSE, eval=T, fig.cap="Fig 4: 1000 GENOMES"}
-p1000_A<-ggplotly(p1000_A)
-p1000_B<-ggplotly(p1000_B)
-p1000_C<-ggplotly(p1000_C)
-subplot(p1000_A, p1000_B, p1000_C, nrows=3)
+```{r, chunk='Fig4', out.height = "1260px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: 1000 GENOMES"}
+#p1000_A<-ggplotly(p1000_A)
+#p1000_B<-ggplotly(p1000_B)
+#p1000_C<-ggplotly(p1000_C)
+t <- 
+plotly::subplot(plotly::ggplotly(p1000_A), plotly::ggplotly(p1000_B), plotly::ggplotly(p1000_C), nrows=3)
+for(x in 1:length(t$x$data)){
+t$x$data[[x]]$showlegend<-FALSE
+}
+
+t
 #cowplot::plot_grid(p1000_A,p1000_B, p1000_C, nrow=3)
 ```
 
