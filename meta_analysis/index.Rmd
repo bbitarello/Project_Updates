@@ -150,17 +150,14 @@ g1000<-lapply(1: length(g1000), function(x) g1000[[x]][,PRS_scaled:=scale(as.mat
 g1000<-do.call(rbind, g1000)
 g1000[,Label:=ifelse(Summary_Stats=="META_EUR", "UKBB+GIANT", ifelse(Summary_Stats=="META_NEA", "META_AFR+PAGE+BBJ", ifelse(Summary_Stats=="META_AFR2", "META_AFR+PAGE", ifelse(Summary_Stats=="META_ALL", paste0("UKBB+BBJ+", "\n", "META_AFR+PAGE"), ifelse(Summary_Stats=="META_ALL2", paste0("UKBB+GIANT+", "\n", "BBJ+META_AFR+PAGE"), Summary_Stats)))))]
 
-g1000$Label<-factor(g1000[, Label])
-#levels(g1000$Label)<-ss_labo
-g1000$Label<-factor(g1000$Label, levels=c("GIANT", "UKBB",  "BBJ","PAGE", "UKBB+GIANT", "META_AFR", "META_AFR+PAGE", "META_AFR+\nPAGE+BBJ", "UKBB+BBJ+\nMETA_AFR+PAGE", "UKBB+GIANT+\nBBJ+META_AFR+PAGE"))
-g1000<-g1000[order(Label)]
+
 g1000$Label<-factor(g1000$Label,levels=levels(factor(g1000$Label))[c(2,7,1,6,9,3,4,5,8,10)])
 
 
 p1000_A<-ggplot(g1000, aes(x=PRS_scaled, fill=super_pop))+ 
 geom_density(alpha=0.6) + labs(y="Density",x="Scaled Polygenic Score", title="")+
         facet_wrap(~Label, nrow=3, strip.position="right") +
-theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)), legend.direction="horizontal", plot.margin = margin(3, 3, 1, 1, "cm")) +
+theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)), legend.direction="horizontal", plot.margin = margin(1, 1, 1, 1, "cm")) +
 scale_fill_manual(values=cols3, name="Populations") + xlim(c(-10,10)) + ylim(c(0,1.2)) 
 
 ```
