@@ -170,7 +170,7 @@ scale_fill_manual(values=cols3, name="Populations") + xlim(c(-10,10)) + ylim(c(0
 p1000_B<-ggplot(g1000[Label2=="Single ancestry"], aes(x=PRS_scaled, fill=super_pop))+ 
 geom_density(alpha=0.6) + labs(x="Density",x="Scaled Polygenic Score", title="")+
         facet_wrap(~Label, labeller = label_wrap_gen(width=2), nrow=1) +
-theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)),legend.position="none", legend.direction="horizontal", plot.margin = margin(4, 4, 4, 4, "cm"))+
+theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)),legend.position="none", legend.direction="horizontal", plot.margin = margin(2,2,2,2, "cm"))+
 scale_fill_manual(values=cols3, name="Populations") + xlim(c(-10,10)) + ylim(c(0,1.2))
 
 p1000_C<-ggplot(g1000[Label2=="Multiple"], aes(x=PRS_scaled, fill=super_pop))+ 
@@ -185,13 +185,13 @@ scale_fill_manual(values=cols3, name="Populations") + xlim(c(-10,10)) + ylim(c(0
 #p1000_B<-ggplotly(p1000_B)
 #p1000_C<-ggplotly(p1000_C)
 t <- 
-plotly::subplot(plotly::ggplotly(p1000_A), plotly::ggplotly(p1000_B), plotly::ggplotly(p1000_C), nrows=3)
+plotly::subplot(plotly::ggplotly(p1000_A), plotly::ggplotly(p1000_B), plotly::ggplotly(p1000_C), nrows=3, margin = 0.01)
 for(x in 1:length(t$x$data)){
 t$x$data[[x]]$showlegend<-FALSE
 }
 
-t
-#cowplot::plot_grid(p1000_A,p1000_B, p1000_C, nrow=3)
+
+cowplot::plot_grid(p1000_A,p1000_B, p1000_C, nrow=3)
 ```
 
 ```{r, echo=F}
