@@ -23,6 +23,7 @@ library('manhattanly')
 library(plotly)
 library('Cairo')
 library(forcats)
+library(gridExtra)
 knitr::opts_chunk$set(cache=TRUE, error=FALSE, fig.cap = " ", message=FALSE, warning=FALSE)
 addline_format <- function(x,...){
     gsub('\\s','\n',x)
@@ -156,42 +157,30 @@ g1000[,Label:=ifelse(Summary_Stats=="META_EUR", "UKBB+GIANT", ifelse(Summary_Sta
 
 g1000$Label<-factor(g1000[, Label])
 #levels(g1000$Label)<-ss_lab
-g1000$Label<-factor(g1000$Label, levels=c("BBJ", "GIANT", "UKBB", "PAGE", "META_AFR", "UKBB+GIANT", "META_AFR+PAGE", "META_AFR+PAGE+BBJ", "UKBB+BBJ+META_AFR+PAGE", "UKBB+GIANT+BBJ+META_AFR+PAGE"))
+g1000$Label<-factor(g1000$Label, levels=c("GIANT", "UKBB",  "BBJ","PAGE", "UKBB+GIANT", "META_AFR", "META_AFR+PAGE", "META_AFR+\nPAGE+BBJ", "UKBB+BBJ+\nMETA_AFR+PAGE", "UKBB+GIANT+\nBBJ+META_AFR+PAGE"))
 g1000<-g1000[order(Label)]
-g1000[,Label2:=ifelse(Label %in% c("UKBB", "GIANT", "BBJ", "PAGE"), "Single Study", ifelse(Label %in% c("UKBB+GIANT", "META_AFR"), "Single ancestry", "Multiple"))]
+g1000[,Label2:=ifelse(Label %in% c("UKBB", "GIANT", "BBJ", "PAGE"), "Single Study", ifelse(Label %in% c("UKBB+GIANT\n, META_AFR"), "Single ancestry", "Multiple"))]
 
 
-p1000_A<-ggplot(g1000[Label2=="Single Study"], aes(x=PRS_scaled, fill=super_pop))+ 
-geom_density(alpha=0.6) + labs(x="Density",x="Scaled Polygenic Score", title="1000 Genomes")+
-        facet_wrap(~Label, labeller = label_wrap_gen(width=2), nrow=1) +
-theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)),legend.position="none", legend.direction="horizontal", plot.margin = margin(2, 2, 2, 2, "cm")) +
+p1000_A<-ggplot(g1000, aes(x=PRS_scaled, fill=super_pop))+ 
+geom_density(alpha=0.6) + labs(y="Density",x="Scaled Polygenic Score", title="")+
+        facet_wrap(~Label, labeller = label_wrap_gen(width=1), nrow=3, strip.position="right") +
+theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)), legend.direction="horizontal", plot.margin = margin(3, 3, 1, 1, "cm")) +
 scale_fill_manual(values=cols3, name="Populations") + xlim(c(-10,10)) + ylim(c(0,1.2)) 
 
-p1000_B<-ggplot(g1000[Label2=="Single ancestry"], aes(x=PRS_scaled, fill=super_pop))+ 
-geom_density(alpha=0.6) + labs(x="Density",x="Scaled Polygenic Score", title="")+
-        facet_wrap(~Label, labeller = label_wrap_gen(width=2), nrow=1) +
-theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)),legend.position="none", legend.direction="horizontal", plot.margin = margin(2,2,2,2, "cm"))+
-scale_fill_manual(values=cols3, name="Populations") + xlim(c(-10,10)) + ylim(c(0,1.2))
-
-p1000_C<-ggplot(g1000[Label2=="Multiple"], aes(x=PRS_scaled, fill=super_pop))+ 
-geom_density(alpha=0.6) + labs(x="Density",x="Scaled Polygenic Score", title="")+
-        facet_wrap(~Label, labeller = label_wrap_gen(width=2), nrow=1) +
-theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)),legend.position="bottom", legend.direction="horizontal", plot.margin = margin(2, 2, 2, 2, "cm"))+
-scale_fill_manual(values=cols3, name="Populations") + xlim(c(-10,10)) + ylim(c(0,1.2))
 ```
 
 ```{r, chunk='Fig4', out.height = "1260px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: 1000 GENOMES"}
 #p1000_A<-ggplotly(p1000_A)
 #p1000_B<-ggplotly(p1000_B)
 #p1000_C<-ggplotly(p1000_C)
-t <- 
-plotly::subplot(plotly::ggplotly(p1000_A), plotly::ggplotly(p1000_B), plotly::ggplotly(p1000_C), nrows=3, margin = 0.01)
-for(x in 1:length(t$x$data)){
-t$x$data[[x]]$showlegend<-FALSE
-}
+#t <- 
+#plotly::subplot(plotly::ggplotly(p1000_A), plotly::ggplotly(p1000_B), plotly::ggplotly(p1000_C), nrows=3, margin = 0.01)
+#for(x in 1:length(t$x$data)){
+#t$x$data[[x]]$showlegend<-FALSE
+#}
 
-
-cowplot::plot_grid(p1000_A,p1000_B, p1000_C, nrow=3)
+ggplotly(p1000_A)
 ```
 
 ```{r, echo=F}
