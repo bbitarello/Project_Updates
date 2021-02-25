@@ -32,7 +32,7 @@ library("ggvenn")
 
 ```
 
-```{r, chunk='Fig 1', out.height = "660px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Points are empirical estimtes, and error bars are bootrstrap standard errors (n=5,000)."}
+```{r, chunk='Fig 1', out.height = "760px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Points are empirical estimtes, and error bars are bootrstrap standard errors (n=5,000)."}
 
 dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_5000_ldpanel_', x, '.txt'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
