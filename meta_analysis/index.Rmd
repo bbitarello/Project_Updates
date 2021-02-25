@@ -32,7 +32,7 @@ library("ggvenn")
 
 ```
 
-```{r, chunk='Fig 1', out.height = "460px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Points are empirical estimtes, and error bars are bootrstrap standard errors (n=5,000)."}
+```{r, chunk='Fig 1', out.height = "660px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Points are empirical estimtes, and error bars are bootrstrap standard errors (n=5,000)."}
 
 dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_5000_ldpanel_', x, '.txt'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
@@ -62,7 +62,7 @@ ss_lab<-unlist(strsplit(levels(dt[,]$Label), ";"))[seq(from=1, to=20, by=2)]
 ggplotly(p2)
 ```
 
-```{r, chunk='Fig 2', out.height = "460px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels."}
+```{r, chunk='Fig 2', out.height = "460px",out.width="710px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels."}
 dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_5000_ldpanel_', x, '.txt'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
 dt[, Summary_Stats:=gsub("PRS_", "", Summary_Stats)]
@@ -162,8 +162,11 @@ geom_text(data=expnd[Test_Data=="PMBB_AFR"][1:3,], aes(x=Alpha, y=value, label=S
 
 ```
 
-```{r, chunk='Fig3',out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).HRS_AFR and PMBB_AFR"}
+```{r, chunk='Fig3',out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 3: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).HRS_AFR and PMBB_AFR"}
 subplot(style(ggplotly(pD), showlegend=F), ggplotly(pE))
+```
+```{r, chunk='Fig4',out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).UKB_CHI"}
+
 ```
 
 ```{r,echo=F}
@@ -188,7 +191,7 @@ g1000$Label<-factor(g1000$Label,levels=levels(factor(g1000$Label,levels=levels(f
 
 ```
 
-```{r, chunk='Fig3', out.height = "1260px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: PRS for height for 2,503 individuals from the 1000 Genomes Project. PRS values are scaled around the mean and standard deviations of PRS for the EUR population, for each set of summary statistics."}
+```{r, chunk='Fig3', out.height = "1260px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 5: PRS for height for 2,503 individuals from the 1000 Genomes Project. PRS values are scaled around the mean and standard deviations of PRS for the EUR population, for each set of summary statistics."}
 #p1000_A<-ggplotly(p1000_A)
 #p1000_B<-ggplotly(p1000_B)
 #p1000_C<-ggplotly(p1000_C)
