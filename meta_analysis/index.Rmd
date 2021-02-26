@@ -32,7 +32,7 @@ library("ggvenn")
 
 ```
 
-```{r, chunk='Fig 1', out.height = "760px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Points are empirical estimtes, and error bars are bootrstrap standard errors (n=5,000)."}
+```{r, chunk='Fig 1', out.height = "760px",out.width="1260px",echo=FALSE, eval=T, fig.cap="Fig 1: Proportion of variance explained. LDpred-Inf with sumamry statistics from UKBB, BBJ, meta-AFR, and meta-ALL. Points are empirical estimtes, and error bars are bootrstrap standard errors (n=5,000)."}
 
 dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_5000_ldpanel_', x, '.txt'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
@@ -46,23 +46,28 @@ dt[,pEUR:=round(pEUR,2)]
 
 #from the wes anderson palette:
 cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20")
+shapes<-c(16,17,18,6,15)
 #cols2<-sample(unlist(wes_palettes),14)
 dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
-p2<-dt %>% select(Summary_Stats:Sample_N, R2:Label2) %>%
+p2<-dt %>%
 dplyr::mutate(Label2= fct_reorder(Label2,pEUR)) %>% mutate(Label=fct_reorder(Label, N)) %>%
 ggplot(aes(x=Label2, y=R2,color=Label, group=N, name=pEUR)) +
-geom_point(size=3, alpha=0.8, position=position_dodge(width=0.8)) +
-geom_errorbar(aes(ymin=R2+SE, ymax=R2-SE), width=0.05, linetype = "dotted",position=position_dodge(width=0.8)) +        facet_wrap(~LD_panel, nrow=2) +
-scale_color_manual(name='Summary Statistics',values = cols) +
+geom_point(alpha=0.8, size=3, position=position_dodge(width=0.8), show.legend = T) +
+        scale_color_manual(name='',values = cols) +
+geom_errorbar(aes(ymin=R2+SE, ymax=R2-SE), width=0.1, linetype = "dotted",position=position_dodge(width=0.8)) +        
+        facet_wrap(~LD_panel, nrow=1) +
 theme_bw()+ labs(x="",y="Variance explained (%)", title="") +
 theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))
 
 ss_lab<-unlist(strsplit(levels(dt[,]$Label), ";"))[seq(from=1, to=20, by=2)]
 
-ggplotly(p2)
+#ggplotly(p2)
+p2<-p2+guides(shape=FALSE, color=FALSE)
+p2g<-ggplotly(p2)
+for(p2 in 1:length(p2g[['x']][['data']])){p2g[['x']][['data']][[i]]$showlegend<-F}
 ```
 
-```{r, chunk='Fig 2', out.height = "460px",out.width="710px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels."}
+```{r, chunk='Fig 2', out.height = "760px",out.width="910px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels."}
 dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_5000_ldpanel_', x, '.txt'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
 dt[, Summary_Stats:=gsub("PRS_", "", Summary_Stats)]
@@ -83,14 +88,25 @@ dt[[1]][, y:=dt[[2]]$R2]
 shapes<-c(16,17,18,6,15)
 p3<-dt[[1]] %>% filter(!Summary_Stats %in% c("META_ALL", "META_ALL2", "META_AFR2")) %>% ggplot(aes(x=R2, y=y)) +
         theme_bw()+
-geom_point(aes(shape=Test, colour=Label), size=5, alpha=0.9, fill='white', show.legend=T) +
-scale_color_manual(name='',values = cols[c(1,2,4,5,6,7,9)]) + 
+geom_point(aes(shape=Test, colour=Label), size=4, alpha=0.8, fill='white', show.legend=T) +
+#scale_color_manual(name='',values = cols[c(1,2,4,5,6,7,9)]) + 
         scale_shape_manual(name='', values=shapes)+
+        scale_color_manual(name="", values=cols[c(1,2,4,5,6,7,9)])+
         labs(y="R2 with 1000G panel", x="R2 with anc specific panel")+
-        geom_abline(intercept=0, slope=1, col='darkgray', lty=2, pwd=2) +
+        geom_abline(intercept=0, slope=1, col='darkgray', lty=2, lwd=0.5) +
 theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)),axis.title.x=element_text(size=rel(1.4)))
 
-p3+geom_text(aes(x=15,y=17),label="x=y")
+p3g<-ggplotly(p3)
+for(i in 1:length(p3g[['x']][['data']])){p3g[['x']][['data']][[i]]$showlegend<-F}
+vec<-c(1,7,13,19,25)
+nams<-c('HRS_AFR','HRS_EUR', 'PMBB_AFR', 'PMBB_EUR', 'UKB_CHI')
+for(i in vec){p3g[['x']][['data']][[i]]$showlegend<-T}
+for(i in 1:length(vec)){p3g[['x']][['data']][[vec[i]]]$name<-nams[i]}
+for(i in vec){p3g[['x']][['data']][[i]]$marker$color<-"rgba(1,1,1,1)"}
+for(i in vec){p3g[['x']][['data']][[i]]$marker$line$color<-"rgba(1,1,1,1)"}
+
+subplot(p2g, p3g, nrows = 2,heights = c(0.55, 0.45))
+ 
 #ggplotly(p2,tooltip=c('R2','N', 'pEUR', 'CI_L', 'CI_U'))
 
 ```
@@ -110,8 +126,6 @@ res3<-as.data.table(melt(res2, id.vars=c('Set', 'Test_Data')))
 res3[,Alpha:=as.numeric(gsub("alpha","",variable))]
 res3[,value:=round(value,1)]
 res3[,Set:=gsub("PRS_", "", Set)]
-
-
 #
 res1<-readRDS('resPRS2_BM.RDs')
 nams<-rownames(res1[[1]])
@@ -125,12 +139,11 @@ res4[,Alpha:=as.numeric(gsub("alpha","",variable))]
 res4[,value:=round(value,1)]
 res4[,Set:=gsub("PRS_", "", Set)]
 
-
 res5<-bind_rows(res3[Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')] %>% mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS1"), res4[Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')] %>%  mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS2")) %>% filter(Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA")) %>% as.data.table
 
 res5$Test_Data<-factor(res5$Test_Data, levels=c('UKB_CHI', 'HRS_AFR', 'PMBB_AFR'))
 res5[, variable:=NULL]
-res5[, Label:=ifelse(Test_Data=='HRS_AFR', addline_format(paste0(Test_Data, " (", 2241, ")")),addline_format(paste0(Test_Data, " (", 8673, ")")))]
+res5[, Label:=ifelse(Test_Data=='HRS_AFR', addline_format(paste0(Test_Data, " (", 2241, ")")),ifelse(Test_Data=='PMBB_AFR',addline_format(paste0(Test_Data, " (", 8673, ")")), addline_format(paste0(Test_Data, " (", 1467, ")"))))]
 res5$Label<-factor(res5$Label)
 label1<-levels(res5$Label)
 
