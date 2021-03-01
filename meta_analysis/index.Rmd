@@ -67,7 +67,7 @@ p2g<-ggplotly(p2)
 #for(i in 1:length(p2g[['x']][['data']])){p2g[['x']][['data']][[i]]$showlegend<-F}
 ```
 
-```{r, chunk='Fig 2', out.height = "760px",out.width="910px",echo=FALSE, eval=T, , fig.cap="Fig 1: A) Proportion of variance explained. LDpred infinitesimal model with summary statistics from UKBB, BBJ, GIANT, PAGE, and combinations of those. Points are empirical estimates, and error bars are bootrstrap standard errors (n=5,000). B) Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels (only datasets for which original LD panel was not the 1000G are included."}
+```{r, chunk='Fig 2', out.height = "960px",out.width="1200px",echo=FALSE, eval=T, , fig.cap="Fig 1: A) Proportion of variance explained. LDpred infinitesimal model with summary statistics from UKBB, BBJ, GIANT, PAGE, and combinations of those. Points are empirical estimates, and error bars are bootrstrap standard errors (n=5,000). B) Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels (only datasets for which original LD panel was not the 1000G are included."}
 dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_5000_ldpanel_', x, '.txt'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
 dt[, Summary_Stats:=gsub("PRS_", "", Summary_Stats)]
@@ -105,7 +105,7 @@ for(i in 1:length(vec)){p3g[['x']][['data']][[vec[i]]]$name<-nams[i]}
 for(i in vec){p3g[['x']][['data']][[i]]$marker$color<-"rgba(1,1,1,1)"}
 for(i in vec){p3g[['x']][['data']][[i]]$marker$line$color<-"rgba(1,1,1,1)"}
 
-subplot(p2g, p3g, nrows = 2,heights = c(0.55, 0.45))
+subplot(p2g, p3g, nrows = 2,heights = c(0.52, 0.48))
  
 #ggplotly(p2,tooltip=c('R2','N', 'pEUR', 'CI_L', 'CI_U'))
 
