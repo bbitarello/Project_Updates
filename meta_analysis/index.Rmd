@@ -219,7 +219,7 @@ g1000$Label<-factor(g1000$Label,levels=levels(factor(g1000$Label,levels=levels(f
 
 ```
 
-```{r, chunk='Fig3', out.height = "1260px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: PRS for height for 2,503 individuals from the 1000 Genomes Project. PRS values are scaled around the mean and standard deviations of PRS for the EUR population, for each set of summary statistics."}
+```{r, chunk='Fig3', out.height = "1260px",out.width="1260px",echo=FALSE, eval=T, fig.cap="Fig 4: PRS for height for 2,503 individuals from the 1000 Genomes Project. PRS values are scaled around the mean and standard deviations of PRS for the EUR population, for each set of summary statistics."}
 #p1000_A<-ggplotly(p1000_A)
 #p1000_B<-ggplotly(p1000_B)
 #p1000_C<-ggplotly(p1000_C)
@@ -232,7 +232,7 @@ p1000_A<-ggplot(g1000, aes(x=PRS_scaled, fill=super_pop))+
 geom_density(alpha=0.6) + labs(y="Density",x="Scaled Polygenic Score", title="")+
         facet_wrap(~Label, nrow=3, strip.position="right") +
 theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)), legend.direction="horizontal", plot.margin = margin(1, 1, 1, 1, "cm")) +
-scale_fill_manual(values=cols3, name="Populations") + xlim(c(-5,5)) + ylim(c(0,1.2))  + theme_bw()
+scale_fill_manual(values=cols3, name="Populations") + xlim(c(-4.8,4.8)) + ylim(c(0,1.4))  + theme_bw()
 
 ggplotly(p1000_A)
 ```
