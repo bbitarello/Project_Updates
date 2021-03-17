@@ -34,7 +34,7 @@ library("ggvenn")
 
 ```{r,echo=FALSE, eval=T}
 
-dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_5000_ldpanel_', x, '.txt'))[, LD_panel:=x])
+dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_1000_ldpanel_', x, '.txt'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
 dt[, Summary_Stats:=gsub("PRS_", "", Summary_Stats)]
 dt[,Label:=paste0(Label, ";", N)]
@@ -50,25 +50,24 @@ shapes<-c(16,17,18,6,15)
 #cols2<-sample(unlist(wes_palettes),14)
 dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
 p2<-dt %>%
-dplyr::mutate(Label2= fct_reorder(Label2,pEUR)) %>% mutate(Label=fct_reorder(Label, N)) %>%
+dplyr::mutate(Label2=fct_reorder(Label2,pEUR)) %>% mutate(Label=fct_reorder(Label, N)) %>%
 ggplot(aes(x=Label2, y=R2,color=Label, group=N, name=pEUR)) +
-geom_point(alpha=0.8, size=3, position=position_dodge(width=0.8), show.legend = T) +
+geom_point(alpha=0.8, size=2, position=position_dodge(width=0.8), show.legend = T) +
         scale_color_manual(name='',values = cols) +
-geom_errorbar(aes(ymin=R2+SE, ymax=R2-SE), width=0.1, linetype = "dotted",position=position_dodge(width=0.8)) +        
+geom_errorbar(aes(ymin=R2+SE, ymax=R2-SE), width=0.05, linetype = "dotted",position=position_dodge(width=0.8)) +        
         facet_wrap(~LD_panel, nrow=1) +
 theme_bw()+ labs(x="",y="Variance explained (%)", title="") +
 theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))
 
-ss_lab<-unlist(strsplit(levels(dt[,]$Label), ";"))[seq(from=1, to=20, by=2)]
-
+ss_lab<-levels((dt %>% mutate(Summary_Stats=fct_reorder(Summary_Stats, N)))$Summary_Stats)
 #ggplotly(p2)
 #p2<-p2+guides(color=TRUE)
 p2g<-ggplotly(p2)
 #for(i in 1:length(p2g[['x']][['data']])){p2g[['x']][['data']][[i]]$showlegend<-F}
 ```
 
-```{r, chunk='Fig 1', out.height = "1200px",out.width="1200px",echo=FALSE, eval=T, , fig.cap="Fig 1: A) Proportion of variance explained. LDpred infinitesimal model with summary statistics from UKBB, BBJ, GIANT, PAGE, and combinations of those. Points are empirical estimates, and error bars are bootrstrap standard errors (n=5,000). B) Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels (only datasets for which original LD panel was not the 1000G are included."}
-dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_5000_ldpanel_', x, '.txt'))[, LD_panel:=x])
+```{r, chunk='Fig 1', out.height = "1200px",out.width="1300px",echo=FALSE, eval=T, , fig.cap="Fig 1: A) Proportion of variance explained. LDpred infinitesimal model with summary statistics from UKBB, BBJ, GIANT, PAGE, and combinations of those. Points are empirical estimates, and error bars are bootrstrap standard errors (n=5,000). B) Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels (only datasets for which original LD panel was not the 1000G are included."}
+dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_1000_ldpanel_', x, '.txt'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
 dt[, Summary_Stats:=gsub("PRS_", "", Summary_Stats)]
 dt[,Label:=paste0(Label, ";", N)]
@@ -83,15 +82,21 @@ cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "
 
 dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
 dt<-split(dt, by="LD_panel")
-dt[[1]][, y:=dt[[2]]$R2]
+dt[[1]][, y:=dt[[2]]$R2][, SE.y:=dt[[2]]$SE]
 
 shapes<-c(16,17,18,6,15)
-p3<-dt[[1]] %>% filter(!Summary_Stats %in% c("META_ALL", "META_ALL2", "META_AFR2")) %>% ggplot(aes(x=R2, y=y)) +
-        theme_bw()+
-geom_point(aes(shape=Test, colour=Label), size=4, alpha=0.8, fill='white', show.legend=T) +
+p3<-dt[[1]] %>% 
+        dplyr::mutate(Label2=fct_reorder(Label2,pEUR)) %>% mutate(Label=fct_reorder(Label, N)) %>%
+        #filter(!Summary_Stats %in% c("META_ALL", "META_ALL2", "META_AFR2", "META_EUR")) %>% 
+        ggplot(aes(x=R2, y=y)) +
+geom_point(aes(shape=Test, colour=Label), size=2.5, alpha=0.8, fill='white', show.legend=T) +
+        geom_errorbarh(aes(xmin=R2+SE, xmax=R2-SE, colour=Label), width=0.03, linetype = "dotted", alpha=0.5)+
+        geom_errorbar(aes(ymin=y+SE.y, ymax=y-SE.y, colour=Label), width=0.03, linetype = "dotted", alpha=0.5)+
 #scale_color_manual(name='',values = cols[c(1,2,4,5,6,7,9)]) + 
         scale_shape_manual(name='', values=shapes)+
-        scale_color_manual(name="", values=cols[c(1,2,4,5,6,7,9)])+
+        #scale_color_manual(name="", values=cols[c(1,2,4,5,6,7,8,9)])+
+        scale_color_manual(name="", values=cols)+
+        theme_bw()+
         labs(y="R2 with 1000G panel", x="R2 with anc specific panel")+
         geom_abline(intercept=0, slope=1, col='darkgray', lty=2, lwd=0.5) +
 theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)),axis.title.x=element_text(size=rel(1.4)))
@@ -105,7 +110,7 @@ for(i in 1:length(vec)){p3g[['x']][['data']][[vec[i]]]$name<-nams[i]}
 for(i in vec){p3g[['x']][['data']][[i]]$marker$color<-"rgba(1,1,1,1)"}
 for(i in vec){p3g[['x']][['data']][[i]]$marker$line$color<-"rgba(1,1,1,1)"}
 
-subplot(p2g, p3g, nrows = 2,heights = c(0.52, 0.48))
+subplot(p2g, p3g, nrows = 2, heights = c(0.55, 0.45))
  
 #ggplotly(p2,tooltip=c('R2','N', 'pEUR', 'CI_L', 'CI_U'))
 
@@ -114,87 +119,86 @@ subplot(p2g, p3g, nrows = 2,heights = c(0.52, 0.48))
 
 ```{r, echo=F}
 set.seed(418)
-cols2<-unname(sample(unlist(wesanderson::wes_palettes),3))
-res1<-readRDS('resPRS1_ML.RDs')
-nams<-rownames(res1[[1]])
-nams2<-names(res1)
-res1<-lapply(1:3, function(x) as.data.table(as.data.frame(res1[[x]])))
-res1<-lapply(res1, function(x) x[,Set:=nams])
-res1<-lapply(1:3, function(x) res1[[x]][,Test_Data:=nams2[x]])
-res2<-do.call(rbind, res1)
-res3<-as.data.table(melt(res2, id.vars=c('Set', 'Test_Data')))
-res3[,Alpha:=as.numeric(gsub("alpha","",variable))]
-res3[,value:=round(value,1)]
-res3[,Set:=gsub("PRS_", "", Set)]
-#
-res1<-readRDS('resPRS2_BM.RDs')
-nams<-rownames(res1[[1]])
-nams2<-names(res1)
-res1<-lapply(1:3, function(x) as.data.table(as.data.frame(res1[[x]])))
-res1<-lapply(res1, function(x) x[,Set:=nams])
-res1<-lapply(1:3, function(x) res1[[x]][,Test_Data:=nams2[x]])
-res2<-do.call(rbind, res1)
-res4<-as.data.table(melt(res2, id.vars=c('Set', 'Test_Data')))
-res4[,Alpha:=as.numeric(gsub("alpha","",variable))]
-res4[,value:=round(value,1)]
-res4[,Set:=gsub("PRS_", "", Set)]
+cols2<-unname(sample(unlist(wesanderson::wes_palettes),4))
+res1<-readRDS('resPRS_multi.RDs')
+nams<-names(res1)
+sets<-names(res1[[1]])
+alphas<-names(res1[[1]][[1]])
+tests<-names(res1[[1]][[1]][[1]])
 
-res5<-bind_rows(res3[Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')] %>% mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS1"), res4[Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')] %>%  mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS2")) %>% filter(Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA", "UKBB--BBJ", "META_EUR--BBJ")) %>% as.data.table
+test<-lapply(nams, function(i) lapply(sets, function(j) lapply(alphas, function(a) data.table(Set=j, Test_Data=i, Alpha=as.numeric(gsub("alpha", "",a)), PRS1=res1[[i]][[j]][[a]]$PRS1, PRS2=res1[[i]][[j]][[a]]$PRS2, PRS2b=res1[[i]][[j]][[a]]$PRS2b))))
 
-res5$Test_Data<-factor(res5$Test_Data, levels=c('UKB_CHI', 'HRS_AFR', 'PMBB_AFR'))
-res5[, variable:=NULL]
-res5[, Label:=ifelse(Test_Data=='HRS_AFR', addline_format(paste0(Test_Data, " (", 2241, ")")),ifelse(Test_Data=='PMBB_AFR',addline_format(paste0(Test_Data, " (", 8673, ")")), addline_format(paste0(Test_Data, " (", 1467, ")"))))]
-res5$Label<-factor(res5$Label)
-label1<-levels(res5$Label)
+RES<-rbind(do.call(rbind, lapply(test[[1]], function(x) do.call(rbind, x))),
+do.call(rbind, lapply(test[[2]], function(x) do.call(rbind, x))),
+do.call(rbind, lapply(test[[3]], function(x) do.call(rbind, x))))
 
-expnd<-rbind(data.table(Set=c("UKBB", "META_NEA"), Test_Data="HRS_AFR", value=c(5.54,4.72), Alpha=c(0,1), PRS="PRS", Label="HRS_AFR\n(2241)"),
-             data.table(Set=c("META_EUR", "META_NEA"), Test_Data="HRS_AFR", value=c(6.12,4.72), Alpha=c(0,1), PRS="PRS", Label="HRS_AFR\n(2241)"),
-             data.table(Set=c("UKBB","META_NEA"), Test_Data="PMBB_AFR", value=c(4.97,5.42), Alpha=c(0,1), PRS="PRS", Label="PMBB_AFR\n(8673)"),
-             data.table(Set=c("META_EUR", "META_NEA"), Test_Data="PMBB_AFR", value=c(5.49,5.42), Alpha=c(0,1), PRS="PRS", Label="PMBB_AFR\n(8673)"),
-             data.table(Set=c("UKBB","BBJ"), Test_Data="UKB_CHI", value=c(10.65,7.81), Alpha=c(0,1), PRS="PRS", Label="UKB_CHI\n(1467)"),
-             data.table(Set=c("META_EUR", "BBJ"), Test_Data="UKB_CHI", value=c(10.75,7.81), Alpha=c(0,1), PRS="PRS", Label="UKB_CHI\n(1467)")) 
+setDT(RES)
+RES<-melt(RES, id.vars=c("Set","Test_Data", "Alpha"))
+
+RES[, Label:=ifelse(Test_Data=='HRS_AFR', addline_format(paste0(Test_Data, " (", 2241, ")")),ifelse(Test_Data=='PMBB_AFR',addline_format(paste0(Test_Data, " (", 8673, ")")), addline_format(paste0(Test_Data, " (", 1467, ")"))))]
+RES$Label<-factor(RES$Label)
+label1<-levels(RES$Label)
+
+expnd<-rbind(data.table(Set=c("UKBB", "META_NEA"), Test_Data="HRS_AFR",  Alpha=c(0,1), value=c(5.54,4.72),PRS="PRS", Label="HRS_AFR\n(2241)"),
+             data.table(Set=c("META_EUR", "META_NEA"), Test_Data="HRS_AFR", Alpha=c(0,1), value=c(6.12,4.72),PRS="PRS", Label="HRS_AFR\n(2241)"),
+             data.table(Set=c("UKBB","META_NEA"), Test_Data="PMBB_AFR",  Alpha=c(0,1),value=c(4.97,5.42), PRS="PRS", Label="PMBB_AFR\n(8673)"),
+             data.table(Set=c("META_EUR", "META_NEA"), Test_Data="PMBB_AFR", Alpha=c(0,1), value=c(5.49,5.42),PRS="PRS", Label="PMBB_AFR\n(8673)"),
+             data.table(Set=c("UKBB","BBJ"), Test_Data="UKB_CHI",  Alpha=c(0,1), value=c(10.65,7.81),PRS="PRS", Label="UKB_CHI\n(1467)"),
+             data.table(Set=c("META_EUR", "BBJ"), Test_Data="UKB_CHI", Alpha=c(0,1), value=c(10.75,7.81), PRS="PRS", Label="UKB_CHI\n(1467)")) 
 expnd[,value:=round(value, 1)]
 
 
 prs3<-rbind(fread("PMBB_AFR_META_EUR_META_NEA_LocAnc.txt")[,Set:="META_EUR--META_NEA"], fread("PMBB_AFR_UKBB_META_NEA_LocAnc.txt")[,Set:="UKBB--META_NEA"])
 
-setnames(prs3,c('Partial_Rsq'), c('value'))
-prs3[, PRS:="PRS3"][, Test_Data:="PMBB_AFR"][, Label:="PMBB_AFR\n(8673)"]
-prs3<-prs3[,.(Set, Test_Data, value, Alpha, PRS, Label)]
-res5<-rbind(res5, prs3)
-        
-pD<-ggplot(res5[Test_Data=="HRS_AFR"][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA")]) +
-geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=F) + geom_point(data=expnd[Test_Data=="HRS_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=2.5, col=cols[c(7,5,9)], alpha=c(0.8, 0.8, 0.8)) +
+setnames(prs3,'Partial_Rsq','value')
+prs3[, variable:="PRS3"][, Test_Data:="PMBB_AFR"][, Label:="PMBB_AFR\n(8673)"]
+prs3<-prs3[,.(Set, Test_Data, Alpha, variable, value, Label)]
+RES2<-rbind(RES, prs3)
+setnames(RES2, 'variable', 'PRS')        
+RES2$Set<-gsub("PRS_", "",RES2$Set)
+pD<-ggplot(RES2[Test_Data=="HRS_AFR" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA", "UKBB--META_ALL2", "META_EUR--META_ALL2")]) +
+geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.6, show.legend=F) + geom_point(data=expnd[Test_Data=="HRS_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=2.5, col=cols[c(7,5,9)], alpha=c(0.8, 0.8, 0.8)) +
 scale_color_manual(values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 theme_bw() + 
-labs(x="Alpha",y="Variance explained (%)", title="") + theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)), legend.position="none", plot.title = element_text("HRS_AFR"))+
+labs(x="Alpha",y="Variance explained (%)", title="") + theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)), legend.position="none")+
          geom_text(data=expnd[Test_Data=="HRS_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(-0.1,-0.15, -0.2), check_overlap=T, size=c(3,3,3))
-
-pE<-ggplot(res5[Test_Data=="PMBB_AFR"][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA")]) +
-geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=T) + 
+#
+pD<-pD+ annotate("text", x = 0.05, y = 8.5, label = "HRS_AFR")
+#
+pE<-ggplot(RES2[Test_Data=="PMBB_AFR"& PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA", "UKBB--META_ALL2", "META_EUR--META_ALL2")]) +
+geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.6, show.legend=T) + 
         geom_point(data=expnd[Test_Data=="PMBB_AFR"][1:3],aes(x=Alpha, y=value), size=2, col=cols[c(7,5,9)], alpha=c(0.8, 0.8, 0.8)) +
 scale_color_manual(name="",values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 theme_bw() + 
 labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
 geom_text(data=expnd[Test_Data=="PMBB_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(0,-0.15, -0.2), check_overlap=T, size=c(3,3,3))+
-        theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank(), plot.title = element_text("PMBB_AFR"))
+        theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank())
 #
-pF<-ggplot(res5[Test_Data=="UKB_CHI"][Set %in% c("UKBB--BBJ", "META_EUR--BBJ")]) +
-geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=T) + 
+pE<-pE+ annotate("text", x = 0.05, y = 8.5, label = "PMBB_AFR")
+#
+
+set.seed(419)
+cols2<-unname(sample(unlist(wesanderson::wes_palettes),4))
+pF<-ggplot(RES2[Test_Data=="UKB_CHI" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--BBJ", "META_EUR--BBJ", "UKBB--META_ALL2","META_EUR--META_ALL2")]) +
+geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.6, show.legend=T) + 
         geom_point(data=expnd[Test_Data=="UKB_CHI"][1:3],aes(x=Alpha, y=value), size=2, col=cols[c(7,5,9)], alpha=c(0.8, 0.8, 0.8)) +
-scale_color_manual(name="",values = cols2[3]) + scale_y_continuous(breaks = seq(0, 15, by = 2)) +
+scale_color_manual(name="",values = cols2) + scale_y_continuous(breaks = seq(0, 15, by = 2)) +
 theme_bw() + 
 labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
 geom_text(data=expnd[Test_Data=="UKB_CHI"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(-0.01, 0.01, -0.005),nudge_y=c(-0.1,0.15, 0.15), check_overlap=T, size=c(3,3,3))+
-        theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank(), plot.title = element_text("UKB_CHI"))
-
+        theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank())
+#
+pF<-pF+ annotate("text", x = 0.05, y = 14, label = "UKB_CHI")
 ```
 
 ```{r, chunk='Fig2',out.height = "960px",out.width="860px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).HRS_AFR (top), PMBB_AFR (middle), UKB_CHI (bottom)"}
-subplot(style(ggplotly(pD), showlegend=F), ggplotly(pE), ggplotly(pF), nrows = 3)
+subplot(style(ggplotly(pD), showlegend=F), ggplotly(pE), nrows=2, shareX=T, shareY=T)
 ```
-```{r, chunk='Fig3',out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).UKB_CHI"}
 
+
+
+```{r, chunk='Fig3',out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).UKB_CHI"}
+ggplotly(pF)
 ```
 
 ```{r,echo=F}
@@ -202,20 +206,20 @@ set.seed(125)
 cols3<-unname(sample(unlist(wesanderson::wes_palettes),5))
 g1000<-readRDS('g1000_1000g_ALL_LD_panel.Rds')
 samples<-fread("integrated_call_samples_v3.20130502.ALL.panel", fill=T, header=T)[,1:4]
-
+nams<-names(g1000)
 superpops<-unique(samples$super_pop)
 setnames(samples, 'sample', 'IID')
-setkey(samples, IID)
-g1000<-lapply(1:10,function(x) g1000[[x]][,Summary_Stats:=names(g1000)[x]])
+setkey(samples, 'IID')
+g1000<-lapply(1:length(g1000),function(x) g1000[[x]][,Summary_Stats:=nams[x]])
 g1000<-lapply(g1000, function(x) merge(x, samples, by="IID"))
 g1000<-lapply(1: length(g1000), function(x) as.data.table(g1000[[x]]))
 m1<-lapply(g1000, function(x) c(mean(x[super_pop=='EUR', PRS]), sd(x[super_pop=='EUR', PRS])))
-g1000<-lapply(1: length(g1000), function(x) g1000[[x]][,PRS_scaled:=scale(as.matrix(PRS), center=m1[[x]][[1]], scale=m1[[x]][[2]]), by=super_pop])
+g1000<-lapply(1: length(g1000), function(x) g1000[[x]][,PRS_scaled:=round(scale(as.matrix(PRS), center=m1[[x]][[1]], scale=m1[[x]][[2]]),2), by=super_pop])
 g1000<-do.call(rbind, g1000)
 g1000[,Label:=ifelse(Summary_Stats=="META_EUR", "UKBB+GIANT", ifelse(Summary_Stats=="META_NEA", "META_AFR+PAGE+BBJ", ifelse(Summary_Stats=="META_AFR2", "META_AFR+PAGE", ifelse(Summary_Stats=="META_ALL", paste0("UKBB+BBJ+", "\n", "META_AFR+PAGE"), ifelse(Summary_Stats=="META_ALL2", paste0("UKBB+GIANT+", "\n", "BBJ+META_AFR+PAGE"), Summary_Stats)))))]
 
 
-g1000$Label<-factor(g1000$Label,levels=levels(factor(g1000$Label,levels=levels(factor(g1000$Label))))[c(2,7,6,1,9,3,4,5,8,10)])
+g1000$Label<-factor(g1000$Label,levels=levels(factor(g1000$Label,levels=levels(factor(g1000$Label))))[c(2,3,8,1,10,4,7,5,6,11,9)])
 
 ```
 
@@ -232,7 +236,7 @@ p1000_A<-ggplot(g1000, aes(x=PRS_scaled, fill=super_pop))+
 geom_density(alpha=0.6) + labs(y="Density",x="Scaled Polygenic Score", title="")+
         facet_wrap(~Label, nrow=3, strip.position="right") +
 theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)), legend.direction="horizontal", plot.margin = margin(1, 1, 1, 1, "cm")) +
-scale_fill_manual(values=cols3, name="Populations") + xlim(c(-4.8,4.8)) + ylim(c(0,1.4))  + theme_bw()
+scale_fill_manual(values=cols3, name="Populations") + xlim(c(-5.5,5.5)) + ylim(c(0,1.4))  + theme_bw()
 
 ggplotly(p1000_A)
 ```

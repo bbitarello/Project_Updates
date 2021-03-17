@@ -1,0 +1,386 @@
+---
+title: "Height Meta-analysis for African ancestry"
+subtitle: "UK Biobank summary statistics"
+output:
+  html_document:
+  fig_caption: yes
+---
+```{r setup, include=F}
+library(flexdashboard)
+library(data.table)
+library(DT)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(ggplot2)
+library(captioner)
+library(qqman)
+library(bigsnpr)
+library(kableExtra)
+library("wesanderson")
+library(rmarkdown)
+library('manhattanly')
+library(plotly)
+library('Cairo')
+library(forcats)
+library(gridExtra)
+knitr::opts_chunk$set(cache=TRUE, error=FALSE, fig.cap = " ", message=FALSE, warning=FALSE)
+addline_format <- function(x,...){
+    gsub('\\s','\n',x)
+}
+```
+
+```{r,echo=FALSE, eval=T}
+
+dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_5000_ldpanel_', x, '.txt'))[, LD_panel:=x])
+dt<-do.call(rbind, dt)
+dt[, Summary_Stats:=gsub("PRS_", "", Summary_Stats)]
+dt[,Label:=paste0(Label, ";", N)]
+dt[,Label2:=addline_format(paste0(Test, " (", Sample_N, ")" ))]
+dt$Label<-factor(dt$Label)
+dt<-dt %>% mutate(Label=fct_reorder(Label, N))
+dt[,R2:=round(R2,2)]
+dt[,pEUR:=round(pEUR,2)]
+
+#from the wes anderson palette:
+cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20", "#354823")
+shapes<-c(16,17,18,6,15)
+#cols2<-sample(unlist(wes_palettes),14)
+dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
+p2<-dt %>%
+dplyr::mutate(Label2= fct_reorder(Label2,pEUR)) %>% mutate(Label=fct_reorder(Label, N)) %>%
+ggplot(aes(x=Label2, y=R2,color=Label, group=N, name=pEUR)) +
+geom_point(alpha=0.8, size=3, position=position_dodge(width=0.8), show.legend = T) +
+        scale_color_manual(name='',values = cols) +
+geom_errorbar(aes(ymin=R2+SE, ymax=R2-SE), width=0.1, linetype = "dotted",position=position_dodge(width=0.8)) +        
+        facet_wrap(~LD_panel, nrow=1) +
+theme_bw()+ labs(x="",y="Variance explained (%)", title="") +
+theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)))
+
+ss_lab<-unlist(strsplit(levels(dt[,]$Label), ";"))[seq(from=1, to=20, by=2)]
+
+#ggplotly(p2)
+#p2<-p2+guides(color=TRUE)
+p2g<-ggplotly(p2)
+#for(i in 1:length(p2g[['x']][['data']])){p2g[['x']][['data']][[i]]$showlegend<-F}
+```
+
+```{r, chunk='Fig 1', out.height = "1200px",out.width="1200px",echo=FALSE, eval=T, , fig.cap="Fig 1: A) Proportion of variance explained. LDpred infinitesimal model with summary statistics from UKBB, BBJ, GIANT, PAGE, and combinations of those. Points are empirical estimates, and error bars are bootrstrap standard errors (n=5,000). B) Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels (only datasets for which original LD panel was not the 1000G are included."}
+dt=lapply(c("anc_specific", "1000g_all"), function(x) fread(paste0('ldpred_table_radius1000_boots_5000_ldpanel_', x, '.txt'))[, LD_panel:=x])
+dt<-do.call(rbind, dt)
+dt[, Summary_Stats:=gsub("PRS_", "", Summary_Stats)]
+dt[,Label:=paste0(Label, ";", N)]
+dt[,Label2:=addline_format(paste0(Test, " (", Sample_N, ")" ))]
+dt$Label<-factor(dt$Label)
+dt<-dt %>% mutate(Label=fct_reorder(Label, N))
+dt[,R2:=round(R2,2)]
+dt[,pEUR:=round(pEUR,2)]
+
+#from the wes anderson palette:
+cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20", "#354823")
+
+dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
+dt<-split(dt, by="LD_panel")
+dt[[1]][, y:=dt[[2]]$R2]
+
+shapes<-c(16,17,18,6,15)
+p3<-dt[[1]] %>% filter(!Summary_Stats %in% c("META_ALL", "META_ALL2", "META_AFR2")) %>% ggplot(aes(x=R2, y=y)) +
+        theme_bw()+
+geom_point(aes(shape=Test, colour=Label), size=4, alpha=0.8, fill='white', show.legend=T) +
+#scale_color_manual(name='',values = cols[c(1,2,4,5,6,7,9)]) + 
+        scale_shape_manual(name='', values=shapes)+
+        scale_color_manual(name="", values=cols[c(1,2,4,5,6,7,9)])+
+        labs(y="R2 with 1000G panel", x="R2 with anc specific panel")+
+        geom_abline(intercept=0, slope=1, col='darkgray', lty=2, lwd=0.5) +
+theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)),axis.title.x=element_text(size=rel(1.4)))
+
+p3g<-ggplotly(p3)
+for(i in 1:length(p3g[['x']][['data']])){p3g[['x']][['data']][[i]]$showlegend<-F}
+vec<-c(1,8,15,22,29)
+nams<-c('HRS_AFR','HRS_EUR', 'PMBB_AFR', 'PMBB_EUR', 'UKB_CHI')
+for(i in vec){p3g[['x']][['data']][[i]]$showlegend<-T}
+for(i in 1:length(vec)){p3g[['x']][['data']][[vec[i]]]$name<-nams[i]}
+for(i in vec){p3g[['x']][['data']][[i]]$marker$color<-"rgba(1,1,1,1)"}
+for(i in vec){p3g[['x']][['data']][[i]]$marker$line$color<-"rgba(1,1,1,1)"}
+
+subplot(p2g, p3g, nrows = 2,heights = c(0.52, 0.48))
+ 
+#ggplotly(p2,tooltip=c('R2','N', 'pEUR', 'CI_L', 'CI_U'))
+
+```
+
+
+```{r, echo=F}
+set.seed(418)
+cols2<-unname(sample(unlist(wesanderson::wes_palettes),3))
+res1<-readRDS('resPRS1_ML.RDs')
+nams<-rownames(res1[[1]])
+nams2<-names(res1)
+res1<-lapply(1:3, function(x) as.data.table(as.data.frame(res1[[x]])))
+res1<-lapply(res1, function(x) x[,Set:=nams])
+res1<-lapply(1:3, function(x) res1[[x]][,Test_Data:=nams2[x]])
+res2<-do.call(rbind, res1)
+res3<-as.data.table(melt(res2, id.vars=c('Set', 'Test_Data')))
+res3[,Alpha:=as.numeric(gsub("alpha","",variable))]
+res3[,value:=round(value,1)]
+res3[,Set:=gsub("PRS_", "", Set)]
+#
+res1<-readRDS('resPRS2_BM.RDs')
+nams<-rownames(res1[[1]])
+nams2<-names(res1)
+res1<-lapply(1:3, function(x) as.data.table(as.data.frame(res1[[x]])))
+res1<-lapply(res1, function(x) x[,Set:=nams])
+res1<-lapply(1:3, function(x) res1[[x]][,Test_Data:=nams2[x]])
+res2<-do.call(rbind, res1)
+res4<-as.data.table(melt(res2, id.vars=c('Set', 'Test_Data')))
+res4[,Alpha:=as.numeric(gsub("alpha","",variable))]
+res4[,value:=round(value,1)]
+res4[,Set:=gsub("PRS_", "", Set)]
+
+res5<-bind_rows(res3[Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')] %>% mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS1"), res4[Test_Data %in% c('PMBB_AFR', 'HRS_AFR', 'UKB_CHI')] %>%  mutate(Set=fct_reorder(Set, value)) %>% mutate(PRS="PRS2")) %>% filter(Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA", "UKBB--BBJ", "META_EUR--BBJ")) %>% as.data.table
+
+res5$Test_Data<-factor(res5$Test_Data, levels=c('UKB_CHI', 'HRS_AFR', 'PMBB_AFR'))
+res5[, variable:=NULL]
+res5[, Label:=ifelse(Test_Data=='HRS_AFR', addline_format(paste0(Test_Data, " (", 2241, ")")),ifelse(Test_Data=='PMBB_AFR',addline_format(paste0(Test_Data, " (", 8673, ")")), addline_format(paste0(Test_Data, " (", 1467, ")"))))]
+res5$Label<-factor(res5$Label)
+label1<-levels(res5$Label)
+
+expnd<-rbind(data.table(Set=c("UKBB", "META_NEA"), Test_Data="HRS_AFR", value=c(5.54,4.72), Alpha=c(0,1), PRS="PRS", Label="HRS_AFR\n(2241)"),
+             data.table(Set=c("META_EUR", "META_NEA"), Test_Data="HRS_AFR", value=c(6.12,4.72), Alpha=c(0,1), PRS="PRS", Label="HRS_AFR\n(2241)"),
+             data.table(Set=c("UKBB","META_NEA"), Test_Data="PMBB_AFR", value=c(4.97,5.42), Alpha=c(0,1), PRS="PRS", Label="PMBB_AFR\n(8673)"),
+             data.table(Set=c("META_EUR", "META_NEA"), Test_Data="PMBB_AFR", value=c(5.49,5.42), Alpha=c(0,1), PRS="PRS", Label="PMBB_AFR\n(8673)"),
+             data.table(Set=c("UKBB","BBJ"), Test_Data="UKB_CHI", value=c(10.65,7.81), Alpha=c(0,1), PRS="PRS", Label="UKB_CHI\n(1467)"),
+             data.table(Set=c("META_EUR", "BBJ"), Test_Data="UKB_CHI", value=c(10.75,7.81), Alpha=c(0,1), PRS="PRS", Label="UKB_CHI\n(1467)")) 
+expnd[,value:=round(value, 1)]
+
+
+prs3<-rbind(fread("PMBB_AFR_META_EUR_META_NEA_LocAnc.txt")[,Set:="META_EUR--META_NEA"], fread("PMBB_AFR_UKBB_META_NEA_LocAnc.txt")[,Set:="UKBB--META_NEA"])
+
+setnames(prs3,c('Partial_Rsq'), c('value'))
+prs3[, PRS:="PRS3"][, Test_Data:="PMBB_AFR"][, Label:="PMBB_AFR\n(8673)"]
+prs3<-prs3[,.(Set, Test_Data, value, Alpha, PRS, Label)]
+res5<-rbind(res5, prs3)
+        
+pD<-ggplot(res5[Test_Data=="HRS_AFR"][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA")]) +
+geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=F) + geom_point(data=expnd[Test_Data=="HRS_AFR"][1:3],aes(x=Alpha, y=value, color=Set), size=2.5, col=cols[c(7,5,9)], alpha=c(0.8, 0.8, 0.8)) +
+scale_color_manual(values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
+theme_bw() + 
+labs(x="Alpha",y="Variance explained (%)", title="") + theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)), legend.position="none", plot.title = element_text("HRS_AFR"))+
+         geom_text(data=expnd[Test_Data=="HRS_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(-0.1,-0.15, -0.2), check_overlap=T, size=c(3,3,3))
+
+pE<-ggplot(res5[Test_Data=="PMBB_AFR"][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA")]) +
+geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=T) + 
+        geom_point(data=expnd[Test_Data=="PMBB_AFR"][1:3],aes(x=Alpha, y=value), size=2, col=cols[c(7,5,9)], alpha=c(0.8, 0.8, 0.8)) +
+scale_color_manual(name="",values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
+theme_bw() + 
+labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
+geom_text(data=expnd[Test_Data=="PMBB_AFR"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(0.05, -0.05, 0.05),nudge_y=c(0,-0.15, -0.2), check_overlap=T, size=c(3,3,3))+
+        theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank(), plot.title = element_text("PMBB_AFR"))
+#
+pF<-ggplot(res5[Test_Data=="UKB_CHI"][Set %in% c("UKBB--BBJ", "META_EUR--BBJ")]) +
+geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.9, show.legend=T) + 
+        geom_point(data=expnd[Test_Data=="UKB_CHI"][1:3],aes(x=Alpha, y=value), size=2, col=cols[c(7,5,9)], alpha=c(0.8, 0.8, 0.8)) +
+scale_color_manual(name="",values = cols2[3]) + scale_y_continuous(breaks = seq(0, 15, by = 2)) +
+theme_bw() + 
+labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
+geom_text(data=expnd[Test_Data=="UKB_CHI"][1:3,], aes(x=Alpha, y=value, label=Set), nudge_x=c(-0.01, 0.01, -0.005),nudge_y=c(-0.1,0.15, 0.15), check_overlap=T, size=c(3,3,3))+
+        theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank(), plot.title = element_text("UKB_CHI"))
+
+```
+
+```{r, chunk='Fig2',out.height = "960px",out.width="860px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).HRS_AFR (top), PMBB_AFR (middle), UKB_CHI (bottom)"}
+subplot(style(ggplotly(pD), showlegend=F), ggplotly(pE), ggplotly(pF), nrows = 3)
+```
+```{r, chunk='Fig3',out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 4: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).UKB_CHI"}
+
+```
+
+```{r,echo=F}
+set.seed(125)
+cols3<-unname(sample(unlist(wesanderson::wes_palettes),5))
+g1000<-readRDS('g1000_1000g_ALL_LD_panel.Rds')
+samples<-fread("integrated_call_samples_v3.20130502.ALL.panel", fill=T, header=T)[,1:4]
+
+superpops<-unique(samples$super_pop)
+setnames(samples, 'sample', 'IID')
+setkey(samples, IID)
+g1000<-lapply(1:10,function(x) g1000[[x]][,Summary_Stats:=names(g1000)[x]])
+g1000<-lapply(g1000, function(x) merge(x, samples, by="IID"))
+g1000<-lapply(1: length(g1000), function(x) as.data.table(g1000[[x]]))
+m1<-lapply(g1000, function(x) c(mean(x[super_pop=='EUR', PRS]), sd(x[super_pop=='EUR', PRS])))
+g1000<-lapply(1: length(g1000), function(x) g1000[[x]][,PRS_scaled:=scale(as.matrix(PRS), center=m1[[x]][[1]], scale=m1[[x]][[2]]), by=super_pop])
+g1000<-do.call(rbind, g1000)
+g1000[,Label:=ifelse(Summary_Stats=="META_EUR", "UKBB+GIANT", ifelse(Summary_Stats=="META_NEA", "META_AFR+PAGE+BBJ", ifelse(Summary_Stats=="META_AFR2", "META_AFR+PAGE", ifelse(Summary_Stats=="META_ALL", paste0("UKBB+BBJ+", "\n", "META_AFR+PAGE"), ifelse(Summary_Stats=="META_ALL2", paste0("UKBB+GIANT+", "\n", "BBJ+META_AFR+PAGE"), Summary_Stats)))))]
+
+
+g1000$Label<-factor(g1000$Label,levels=levels(factor(g1000$Label,levels=levels(factor(g1000$Label))))[c(2,7,6,1,9,3,4,5,8,10)])
+
+```
+
+```{r, chunk='Fig3', out.height = "1260px",out.width="1260px",echo=FALSE, eval=T, fig.cap="Fig 4: PRS for height for 2,503 individuals from the 1000 Genomes Project. PRS values are scaled around the mean and standard deviations of PRS for the EUR population, for each set of summary statistics."}
+#p1000_A<-ggplotly(p1000_A)
+#p1000_B<-ggplotly(p1000_B)
+#p1000_C<-ggplotly(p1000_C)
+#t <- 
+#plotly::subplot(plotly::ggplotly(p1000_A), plotly::ggplotly(p1000_B), plotly::ggplotly(p1000_C), nrows=3, margin = 0.01)
+#for(x in 1:length(t$x$data)){
+#t$x$data[[x]<-FALSE
+#}
+p1000_A<-ggplot(g1000, aes(x=PRS_scaled, fill=super_pop))+ 
+geom_density(alpha=0.6) + labs(y="Density",x="Scaled Polygenic Score", title="")+
+        facet_wrap(~Label, nrow=3, strip.position="right") +
+theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)), legend.direction="horizontal", plot.margin = margin(1, 1, 1, 1, "cm")) +
+scale_fill_manual(values=cols3, name="Populations") + xlim(c(-4.8,4.8)) + ylim(c(0,1.4))  + theme_bw()
+
+ggplotly(p1000_A)
+```
+
+```{r, echo=F}
+dt<-fread('ss_datasets.txt')
+dt[, Main_ancestry:=c('Afr+Eur', 'Afr','Afr, Afr+Eur', 'Afr, Afr+Eur', 'Afr+Eur,Latino, others', 'Afr, Afr+Eur, Latino, others', 'East Asian', 'E. Asian,Afr+Eur, Afr, Latino, others', 'Eur', 'Eur', 'Eur, E.Asian, Afr, Afr+Eur, Latino, others', 'Eur', 'Eur, E.Asian, Afr, Afr+Eur, Latino, others')]
+dt[, LD_panel_ldpred:=c("N/A","N/A", "N/A","1KGP3_afr(N=660)","1KGP3_nea(N=2001)", "1KGP3_nea(N=2001)", "1KGP3_eas(N=504)", "1KGP3_nea(N=2001)", "UKB_EUR(N=8000)", "UKB_EUR(N=8000)","1KGP3_all(N=2598)","UKB_EUR(N=8000)", "1KGP3_all(N=2598)")]
+
+my_table<-datatable(dt,options = list(pageLength = 13), caption="Table 1. Summary statistics used in this study. * Afr+Eur means two way admixed individuals (afr, eur); Latino: typically admixed inviduals with Afr, Eur, and Native american ancestries.")
+my_table
+#knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
+```
+
+
+```{r, echo=F}
+dt4<-data.table(Dataset=c('UKBB_chi', 'PMBB_afr', 'HRS_afr', 'PMBB_eur', 'HRS_eur'), N=c(1467,8726,2251,6709,10159), SNPs_UKBB=c(148521,157187,160326,975002))
+my_table4<-datatable(dt4,options = list(pageLength = 12), caption="Table 2. Test data post filtering")
+my_table4
+#knitr::kable(dt, caption="Table 1. Summary statistics used in meta-analyses.")
+```
+# Discussion
+
+A preprint from Racimo's lab found this:
+"The largest inconsistencies [in polygenic selection signals] across tests are found using meta-analysis data. In other words, the overdispersion between polygenic scores is attenuated using large-scale datasets with relatively homogeneous ancestries. We also show how is possible to create the observed overdispersion by artificially creating a meta-analysis from the UK Biobank data."
+
+# Background
+
+In our previous work, we analysed the factors that drive reduced prediction accuracy of polygenic scores for height in individuals with African ancestry. 
+
+We saw that SFS and LD play a role, but there is also suggestive evidence that differences in marginal effect sizes exist.
+
+In that study we ran a GWAS in ~8,000 individuals with African ancestry from the UKBB and tested for differences in marginal effect sizes between those and European derived effect sizes, as well as correlations of those differences with allelic frequency differences. Finally, we implemented ancestry-informed PRSs in the admixed individuals, and observed only very modest improvement in prediction accuracy.
+
+It is possible that that modest improvement was due to our low sample size. So here we use a much larger sample size (about 58K African ancestry individuals and 91K total) to explore the potential of ancestry-informed PRSs for height. We also try a larger meta-analysis, with 58K African ancestry individuals and 
+
+Another interesting thing is to see whether by fine-mapping index variants by including African ancestry we can select SNPs that yield better PRS performance.
+
+Questions:
+
+1) Do multi-PRS and LA-PRS increase in prediction by using effect-sizes from a meta-African analysis? What about a meta-Pan analysis?
+
+2) What is the overlap between GWAS hits between GWAS for EUR only and BBJ only, AFR only and combinations of those?
+
+3) When we select ancestry-specific index variants and then use those in the PRS, does prediction improve?
+
+# Methods
+
+For now, we are focusing on height only.
+
+## GWAS summary statistics
+We use GWAS summary statistics for height from six sources::
+
+*UKBB_eur: UK Biobank Europeans
+
+*BBJ: Biobank Japan
+
+*Uganda Genome Project - which is a meta-analysis of Uganda + 3 other populations from Africa, described in the Uganda Genome Project paper); 
+
+* UKBB_afr- from the African subset from the panUKBB dataset.
+
+* N'diaye et al. 2011 - still the largest height GWAS performed in African ancestry individuals; 
+
+* PAGE, a large meta-analysis including 35% African Americans and the remaining participants are mostly of Hispanic/Latino and other minority ancestries.
+
+So our meta-AFR analysis includes: PAGE, Ndiaye, UKBB_afr and 4 cohorts from UGP. 
+
+Our meta-all analysis includes: meta-AFR, UKBB_eur, BBJ.
+
+## Meta-analysis in METAL
+
+We performed two meta-analysis:
+
+*meta-AFR: UGP+pan-UKBB(AFR)+N'Diaye et al. 2011 meta-analysis, PAGE project. Total of 90,970 individuals (58488 of African ancestry). See Table 1.
+
+*meta-ALL: Our meta-ALL analysis includes: UKBB_eur, meta-AFR (previous step), BBJ (Biobank Japan, N=159,095) Total of 610,453 (58488 of African ancestry). See Table 1.
+
+Note that both have the same amount of African ancestry individuals (N=XX). We performed meta-ALL to check whether bigger sample size and increased diversity in the discovery cohort would improve predictions.
+
+We ran a meta-analysis using METAL using one file for each of the above datasets. We set genomic correction to "ON", meaning it is performed for each file (not the final values). We performed the meta-analysis using SCHEME STDERR, meaning betas and SE are used. For the meta-AFR analysis, we set AVERAGEFREQ and MINMAXFREQ to "ON" so that metal can track large allelic frequency differences across datasets as suggestion of allelic mismatch. We only report results for variants that have a combined weight of at least 49,781 (meta-AFR) or 590026 individuals, resulting in about 20 million autosomal variants in both datasets. 
+
+We inspected the p-value distribution of these meta-analyses using QQ-plots and calculated the genomic inflation on the final p-values, and performed corrections accordingly.
+
+## Data QC
+
+## Summary statistics QC
+
+Most were in hg19 build, except N'diaye, which we lift over from hg18 to hg19. Previous filtering was done in each of these studies, and there is often not enough information for us to perform our own filtering.
+
+* UGP: this is very recent. They filtered for imputation score > 0.3.
+
+* pan-UKBB: They filter for INFO scores > 0.8 and minimum allele count of 20 in each population. They also provide a True/False filter for "low_quality_AFR" which we use, retaining only those for which it is 'false'. GWAS included: Age, sex, Age\*sex, Age2, Age2\*sex, the first 10 PCs. Inverse-normal transformation of height in cm.
+
+* N'diaye et al.: The genomic control inflation (GC) factor was calculated for each study and used for within-study correction, prior to the meta-analysis. The overall lambda they report is 1.064 (which we confirm, see table below) suggesting no inflation in this meta-analysis. Imputation info score not available, but authors filtered for >= 0.3. Betas and SE in units of z-score.
+
+PAGE: inverse-normal-adjusted residuals for each trait outcome. Info score available. Filtered for > 0.4 by authors prior. We were more strict and filtered for > 0.8.
+
+As mentioned, for the meta-analyses summary statistics we only retained positions for which there was information for most individuals in the meta-analysis (20.7 and 23.7 M SNPs for meta-AFR and meta-ALL respectively).
+
+For UKBB_eur, we retained only SNPs with INFO> 0.8 (11.9 M SNPs) and low_quality_variant=FALSE (15.4 M SNPs). Only autosomal SNPs were analyzed. 
+
+### LD reference panels
+
+For PRS using summary statistics from the UKBB_eur, we used the UKBB_eur (5,000 randomly sampled) imputed data as LD reference panel.For PRS using the BBJ summary statictics, we used a combination of the 1000G Phase 3 East Asians and UKBB Chinese individuals. For the meta-AFR summary statistics, we used a combination of UKBB_afr and 1000G Phase 3 African ancestry individuals. For the meta-ALL summary statistics, we used a combination of all Phase 3 1000G individuals, the UKBB_eur, UKBB_afr, and UKBB_chi. In all cases, the combined sets were QC'd to only include unrelated individuals (plink --rel-cutoff 0.125) and with genotype missingness < 0.85. We further restricted these sets to SNPs with MAF > 0.001. We further removed SNPs with allelic mismatch with the UKBB_EUR summary statistics file and corrected for strand flipping when appropriate. 
+
+### Test data
+
+For test data, we used the Penn Biobank subsets of European American and African American individuals (Table XX), the HRS subsets of European and African Americans, and the UKBB Chinese individuals (Table XX). 
+Individuals with height further than two deviations from the sex-cohort specific mean were not included. (Table 3)
+
+## Test cohorts
+
+ Genotype data from test cohorts was lifted over to hg38 when needed. 
+
+* PMBB (Penn Biobank): with sets of EUR (7501) and AFR ancestry individuals (9226)
+
+* UKB_CHI (UKBB Chinese): a set of 1,504 individuals with Chinese ancestry from the UK Biobank.
+
+* HRS (Health and Retirement Study): with sets of EUR (10,486) and AFR (2,322) ancestry individuals.
+
+We visually inspected qq-plots of height residuals for each dataset to check for extreme outliers. Based on this inspection, we restricted PMBB (Figs 3-4 for before and after filtering) and HRS (Figs 5-6 for before and after filtering) samples to those for which residual height was between $\pm3$ standard deviations from the mean for each sex. For UKB-CHI, no filtering was necessary (Fig 7). Height residuals were obtained by regressing height on all co-variates and their interactions for each individual:
+
+$$height\sim Sex+Age+Age^2+Sex*Age+Sex*Age^2+pEUR+Sex*pEUR+Age*pEUR+Age^2*pEUR$$ 
+
+, where $p_{EUR}$ is the genome-wide average proportion of European ancestry for PMBB_afr and HRS_afr (estimated through RFMIx), and the European ancestry component (estimated through unsupervised ADMIXTURE with k=2) for UKB_CHI. For HRS_eur and PMBB_eur, we set $p_{EUR}$ to 1. 
+
+When multiple time points were available for each individual, we retained the one corresponding to the latest height measure and age. All height phenotype data was formatted to be in centimeters. 
+
+Each test cohort was randomly divided into a "train" and a "test" set following the ratio of 0.15 (train) and 0.85 (test) for most datasets, except for UKB_CHI and HRS_afr, where we used 0.20:0.80 (Table 2). We performed a stratified split of the data using the initial_split function from the rsample R package. We used 'Sex' as strate, i.e, to maintain Sex proportions within training and testing sets similar (Table 2)
+
+### PRS calculations
+
+We used LDpred for PRS calculations. For UKBB_eur summary statistics, we used the UKBB_eur as LD reference panel; for BBJ and meta-AFR we used East Asians and Africans from 1000G Phase 3, respectively. We first ran ldpred coord to coordinate the summary statistics, test and LD datasets. Next we ran the gibbs sampler. Many values of p did not covnerge, but typically p=1 and p=0.3 did converge, so we looked at those, as well as the infinitesimal model. See Table 
+
+PRS_eur: PRS using effect sizes ($\beta$) from UKBB_eur. 
+
+PRS_eas: PRS using effect sizes ($\beta$) from BBJ (all East Asian).
+
+PRS_afr: PRS using effect sizes (($\beta$) from the meta-AFR GWAS.
+
+PRS_all: PRS using effect sizes (($\beta$) from the meta-ALL GWAS.
+
+1) A simple linear regression model
+
+
+$$height~Sex+Age+Age2+pEUR$$ 
+
+$$height~Sex+Age+Age2+pEUR+PRS_{eur}$$ 
+
+
+2) PRS1_ML (described in Marquez-Luna et al. 2017 and Bitarello & Mathieson 2020)
+
+3) PRS2_BD - linear combination of PRS described in Bitarello & Mathieson 2020
