@@ -45,7 +45,7 @@ dt[,R2:=round(R2,2)]
 dt[,pEUR:=round(pEUR,2)]
 
 #from the wes anderson palette:
-cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20", "#354823")
+cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20", "#354823", "#D69C4E")
 shapes<-c(16,17,18,6,15)
 #cols2<-sample(unlist(wes_palettes),14)
 dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
@@ -78,7 +78,7 @@ dt[,R2:=round(R2,2)]
 dt[,pEUR:=round(pEUR,2)]
 
 #from the wes anderson palette:
-cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20", "#354823")
+cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20", "#354823", "#D69C4E")
 
 dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
 dt<-split(dt, by="LD_panel")
