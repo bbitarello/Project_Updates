@@ -58,7 +58,7 @@ geom_point(alpha=0.8, size=2, position=position_dodge(width=0.8), show.legend = 
 geom_errorbar(aes(ymin=R2+SE, ymax=R2-SE), width=0.05, linetype = "dotted",position=position_dodge(width=0.8)) +        
         facet_wrap(~LD_panel, nrow=1) +
 theme_bw()+ labs(x="",y="Variance explained (%)", title="") +
-theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text(size=rel(1.4)), axis.title.x=element_text("Variance Explained %"))
+theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text("Variance Explained %", size=rel(1.4)))
 
 ss_lab<-levels((dt %>% mutate(Summary_Stats=fct_reorder(Summary_Stats, N)))$Summary_Stats)
 #ggplotly(p2)
@@ -113,7 +113,7 @@ for(i in 1:length(vec)){p3g[['x']][['data']][[vec[i]]]$name<-nams[i]}
 for(i in vec){p3g[['x']][['data']][[i]]$marker$color<-"rgba(1,1,1,1)"}
 for(i in vec){p3g[['x']][['data']][[i]]$marker$line$color<-"rgba(1,1,1,1)"}
 
-subplot(p2g, p3g, nrows = 2, margin = 0.03, shareX=F, shareY=F, titleX=T, titleY=T)
+subplot(p2g, p3g, nrows = 2, margin = c(0.03, 0.02, 0.02, 0.03), shareX=F, shareY=F, titleX=T, titleY=T)
 
 ```
 
@@ -168,11 +168,11 @@ RES2[, value:=round(value, 2)]
 #pD<-ggplot(RES2[Test_Data=="HRS_AFR" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA", "UKBB--META_ALL2", "META_EUR--META_ALL2")]) +
 pD<-ggplot(RES2[Test_Data=="HRS_AFR" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA")])+
 geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.6, show.legend=F) + geom_point(data=expnd[Test_Data=="HRS_AFR"][c(1:3)],aes(x=Alpha, y=value, color=Set), size=2.5, col=cols[c(9,5,4)], alpha=c(0.8, 0.8, 0.8)) +
-         geom_text(data=expnd[Test_Data=="HRS_AFR"][Set=="META_ALL2"], aes(x=Alpha, y=value, label=Set), nudge_x=-0.1, nudge_y=0.1, check_overlap=T, size=3)+
+         geom_text(data=expnd[Test_Data=="HRS_AFR"][c(1:3,6),], aes(x=Alpha, y=value, label=Set), nudge_x=c(0,-0.05, 0, -0.05), nudge_y=c(0.1, 0.1, -0.05, 0.1), check_overlap=T, size=3)+
 scale_color_manual(name="",values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 theme_bw() + 
 labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
-geom_hline(yintercept=expnd[Test_Data=="HRS_AFR"][Set=="META_ALL2"]$value,  col=cols[10])+
+geom_hline(yintercept=expnd[Test_Data=="HRS_AFR"][Set=="META_ALL2"]$value,  col="darkgray")+
         theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank())
 #
 #
@@ -182,26 +182,23 @@ pD<-pD+ annotate("text", x = 0.05, y = 8.5, label = "HRS_AFR", size=4)
 pE<-ggplot(RES2[Test_Data=="PMBB_AFR" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA")])+
 geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.6, show.legend=T) + 
         geom_point(data=expnd[Test_Data=="PMBB_AFR"][c(1:3)],aes(x=Alpha, y=value), size=2, col=cols[c(9,5,4)], alpha=c(0.8, 0.8, 0.8)) +
-        geom_text(data=expnd[Test_Data=="PMBB_AFR"][Set=="META_ALL2"], aes(x=Alpha, y=value, label=Set), nudge_x=-0.1, nudge_y=0.1, check_overlap=T, size=3)+
+        geom_text(data=expnd[Test_Data=="PMBB_AFR"][c(1:4,6),], aes(x=Alpha, y=value, label=Set), nudge_x=c(-0.05, -0.02, -0.08, 0.05), nudge_y=c(0.08, 0.8, -0.07, 0.1), check_overlap=T, size=3)+
 scale_color_manual(name="",values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 theme_bw() + 
 labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
-geom_hline(yintercept=expnd[Test_Data=="PMBB_AFR"][Set=="META_ALL2"]$value,  col=cols[10])+
+geom_hline(yintercept=expnd[Test_Data=="PMBB_AFR"][Set=="META_ALL2"]$value,  col="darkgray")+
         theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank())
 #
 pE<-pE+ annotate("text", x = 0.05, y = 8.5, label = "PMBB_AFR", size=4)
 #
-
-set.seed(419)
-cols2<-unname(sample(unlist(wesanderson::wes_palettes),4))
 #pF<-ggplot(RES2[Test_Data=="UKB_CHI" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--BBJ", "META_EUR--BBJ", "UKBB--META_ALL2","META_EUR--META_ALL2")]) +
 pF<-ggplot(RES2[Test_Data=="UKB_CHI" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--BBJ", "META_EUR--BBJ")])+
 geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.6, show.legend=T) + 
-  geom_text(data=expnd[Test_Data=="UKB_CHI"][Set=="META_ALL2"], aes(x=Alpha, y=value, label=Set), nudge_x=-0.1, nudge_y=0.1, check_overlap=T, size=3)+
+  geom_text(data=expnd[Test_Data=="UKB_CHI"][c(1:3,6),], aes(x=Alpha, y=value, label=Set), nudge_x=c(-0.05,-0.03,-0.03, -0.03), nudge_y=c(0.07, -0.07, -0.01, 0.9), check_overlap=T, size=3)+
 scale_color_manual(name="",values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 theme_bw() + 
 labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
-geom_hline(yintercept=expnd[Test_Data=="UKB_CHI"][Set=="META_ALL2"]$value,  col=cols[10])+
+geom_hline(yintercept=expnd[Test_Data=="UKB_CHI"][Set=="META_ALL2"]$value,  col="darkgray")+
         theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank())
 #
 pF<-pF+ annotate("text", x = 0.05, y = 14, label = "UKB_CHI", size=4)
