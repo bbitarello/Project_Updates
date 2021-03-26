@@ -230,7 +230,7 @@ g1000<-lapply(1: length(g1000), function(x) as.data.table(g1000[[x]]))
 m1<-lapply(g1000, function(x) c(mean(x[super_pop=='EUR', PRS]), sd(x[super_pop=='EUR', PRS])))
 g1000<-lapply(1: length(g1000), function(x) g1000[[x]][,PRS_scaled:=round(scale(as.matrix(PRS), center=m1[[x]][[1]], scale=m1[[x]][[2]]),2), by=super_pop])
 g1000<-do.call(rbind, g1000)
-g1000[,Label:=ifelse(Summary_Stats=="META_EUR", "UKBB+GIANT", ifelse(Summary_Stats=="META_NEA", "META_AFR+PAGE+BBJ", ifelse(Summary_Stats=="META_AFR2", "META_AFR+PAGE", ifelse(Summary_Stats=="META_ALL", paste0("UKBB+BBJ+", "\n", "META_AFR+PAGE"), ifelse(Summary_Stats=="META_ALL2", paste0("UKBB+GIANT+", "\n", "BBJ+META_AFR+PAGE"), Summary_Stats)))))]
+g1000[,Label:=ifelse(Summary_Stats=="META_EUR", "UKBB+GIANT", ifelse(Summary_Stats=="META_NEA", "META_AFR+PAGE+BBJ", ifelse(Summary_Stats=="META_AFR2", "META_AFR+PAGE", ifelse(Summary_Stats=="META_ALL", paste0("UKBB+BBJ+META_AFR+PAGE"), ifelse(Summary_Stats=="META_ALL2", paste0("UKBB+GIANT+BBJ+META_AFR+PAGE"), Summary_Stats)))))]
 
 g1000<-g1000[Summary_Stats!="GIANT0"][Summary_Stats!="GIANT2"]
 g1000$Label<-factor(g1000$Label,levels=levels(factor(g1000$Label))[c(2,1,7,6,9,3,4,5,8,10)])
@@ -269,7 +269,7 @@ g1000<-lapply(1: length(g1000), function(x) as.data.table(g1000[[x]]))
 m1<-lapply(g1000, function(x) c(mean(x[super_pop=='EUR', PRS]), sd(x[super_pop=='EUR', PRS])))
 g1000<-lapply(1: length(g1000), function(x) g1000[[x]][,PRS_scaled:=round(scale(as.matrix(PRS), center=m1[[x]][[1]], scale=m1[[x]][[2]]),2), by=super_pop])
 g1000<-do.call(rbind, g1000)
-g1000[,Label:=ifelse(Summary_Stats=="META_EUR", "UKBB+GIANT", ifelse(Summary_Stats=="META_NEA", "META_AFR+PAGE+BBJ", ifelse(Summary_Stats=="META_AFR2", "META_AFR+PAGE", ifelse(Summary_Stats=="META_ALL", paste0("UKBB+BBJ+", "\n", "META_AFR+PAGE"), ifelse(Summary_Stats=="META_ALL2", paste0("UKBB+GIANT+", "\n", "BBJ+META_AFR+PAGE"), Summary_Stats)))))]
+g1000[,Label:=ifelse(Summary_Stats=="META_EUR", "UKBB+GIANT", ifelse(Summary_Stats=="META_NEA", "META_AFR+PAGE+BBJ", ifelse(Summary_Stats=="META_AFR2", "META_AFR+PAGE", ifelse(Summary_Stats=="META_ALL", paste0("UKBB+BBJ+META_AFR+PAGE"), ifelse(Summary_Stats=="META_ALL2", paste0("UKBB+GIANT+BBJ+META_AFR+PAGE"), Summary_Stats)))))]
 
 g1000<-g1000[Summary_Stats!="GIANT0"][Summary_Stats!="GIANT2"]
 g1000$Label<-factor(g1000$Label,levels=levels(factor(g1000$Label))[c(2,1,7,6,9,3,4,5,8,10)])
