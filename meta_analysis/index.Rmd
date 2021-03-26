@@ -168,7 +168,7 @@ RES2[, value:=round(value, 2)]
 #pD<-ggplot(RES2[Test_Data=="HRS_AFR" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA", "UKBB--META_ALL2", "META_EUR--META_ALL2")]) +
 pD<-ggplot(RES2[Test_Data=="HRS_AFR" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA")])+
 geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.6, show.legend=F) + geom_point(data=expnd[Test_Data=="HRS_AFR"][c(1:3)],aes(x=Alpha, y=value, color=Set), size=2.5, col=cols[c(9,5,4)], alpha=c(0.8, 0.8, 0.8)) +
-         geom_text(data=expnd[Test_Data=="HRS_AFR"][c(1:3,6),], aes(x=Alpha, y=value, label=Set), nudge_x=c(0,-0.05, 0, -0.05), nudge_y=c(0.1, 0.1, -0.05, 0.1), check_overlap=T, size=3)+
+         geom_text(data=expnd[Test_Data=="HRS_AFR"][c(1:3,6),], aes(x=Alpha, y=value, label=Set), nudge_x=c(0,-0.1, -0.02,0), nudge_y=c(-0.15, 0, 0.15, 0.1), check_overlap=T, size=3)+
 scale_color_manual(name="",values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 theme_bw() + 
 labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
@@ -182,7 +182,7 @@ pD<-pD+ annotate("text", x = 0.05, y = 8.5, label = "HRS_AFR", size=4)
 pE<-ggplot(RES2[Test_Data=="PMBB_AFR" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA")])+
 geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.6, show.legend=T) + 
         geom_point(data=expnd[Test_Data=="PMBB_AFR"][c(1:3)],aes(x=Alpha, y=value), size=2, col=cols[c(9,5,4)], alpha=c(0.8, 0.8, 0.8)) +
-        geom_text(data=expnd[Test_Data=="PMBB_AFR"][c(1:4,6),], aes(x=Alpha, y=value, label=Set), nudge_x=c(-0.05, -0.02, -0.08, 0.05), nudge_y=c(0.08, 0.8, -0.07, 0.1), check_overlap=T, size=3)+
+        geom_text(data=expnd[Test_Data=="PMBB_AFR"][c(1:3,6),], aes(x=Alpha, y=value, label=Set), nudge_x=c(-0.02, -0.07, -0.03, 0), nudge_y=c(-0.03, -0.03, 0.05, 0.1), check_overlap=T, size=3)+
 scale_color_manual(name="",values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 theme_bw() + 
 labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
@@ -194,9 +194,10 @@ pE<-pE+ annotate("text", x = 0.05, y = 8.5, label = "PMBB_AFR", size=4)
 #pF<-ggplot(RES2[Test_Data=="UKB_CHI" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--BBJ", "META_EUR--BBJ", "UKBB--META_ALL2","META_EUR--META_ALL2")]) +
 pF<-ggplot(RES2[Test_Data=="UKB_CHI" & PRS %in% c("PRS1", "PRS2")][Set %in% c("UKBB--BBJ", "META_EUR--BBJ")])+
 geom_line(aes(x=Alpha, y=value, color=Set, linetype=PRS), size=0.6, show.legend=T) + 
-  geom_text(data=expnd[Test_Data=="UKB_CHI"][c(1:3,6),], aes(x=Alpha, y=value, label=Set), nudge_x=c(-0.05,-0.03,-0.03, -0.03), nudge_y=c(0.07, -0.07, -0.01, 0.9), check_overlap=T, size=3)+
+  geom_text(data=expnd[Test_Data=="UKB_CHI"][c(1:3,6),], aes(x=Alpha, y=value, label=Set), nudge_x=c(-0.05,-0.03,-0.05, -0.03), nudge_y=c(-0.03, -0.05, 0.03, 0.1), check_overlap=T, size=3)+
 scale_color_manual(name="",values = cols2) + scale_y_continuous(breaks = seq(0, 10, by = 1)) +
 theme_bw() + 
+        geom_point(data=expnd[Test_Data=="UKB_CHI"][c(1:3)],aes(x=Alpha, y=value), size=2, col=cols[c(9,5,4)], alpha=c(0.8, 0.8, 0.8)) +
 labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
 geom_hline(yintercept=expnd[Test_Data=="UKB_CHI"][Set=="META_ALL2"]$value,  col="darkgray")+
         theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank())
@@ -205,7 +206,7 @@ pF<-pF+ annotate("text", x = 0.05, y = 14, label = "UKB_CHI", size=4)
 ```
 
 ```{r, chunk='Fig2',out.height = "960px",out.width="860px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).HRS_AFR (top), PMBB_AFR (middle), UKB_CHI (bottom)"}
-subplot(style(ggplotly(pD), showlegend=F), ggplotly(pE), nrows=2, shareX=T, shareY=T)
+subplot(style(ggplotly(pD), showlegend=F), ggplotly(pE), nrows=2, shareX=T, shareY=F)
 ```
 
 
