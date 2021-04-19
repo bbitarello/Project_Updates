@@ -37,23 +37,25 @@ dt<-do.call(rbind, dt)
 dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
 dt[, Label:=paste0(Label, ";", N)]
 dt<-dt[,.(R2_PRS0,SE_PRS0,Test_Data, N, Label, Label2, pEUR, LD_panel,ss1)]
+#dt[, Label:=ifelse(ss1=='PRS_META_EUREAS', 'UKBB+BBJ', ifelse(ss1=='PRS_META_EUREAS2', 'UKBB+GIANT+BBJ', ifelse(ss1=='PRS_META_AFR2', 'META_AFR+PAGE', ifelse(ss1=='PRS_META_ALL2','UKBB+GIANT+BBJ+PAGE+META_AFR', ifelse(ss1=='PRS_META_ALL', 'UKBB+BBJ+PAGE+META_AFR',ifelse(ss1=='PRS_META_EUR', 'UKBB+GIANT',ss1))))))]
 setnames(dt, c('R2_PRS0', 'SE_PRS0'), c('R2','SE'))
 dt$Label<-factor(dt$Label)
 dt<-dt %>% mutate(Label=fct_reorder(Label, N))
 dt[,R2:=round(R2,2)];dt[,pEUR:=round(pEUR,2)]
-dt[,Test_Data:=ifelse(Test_Data=='UKB_CHI', "UKB_CHI\n(1467)", ifelse(Test_Data=='HRS_AFR', 'HRS_AFR\n(2241)', ifelse(Test_Data=='PMBB_AFR', 'PMBB_AFR\n(8673)', ifelse(Test_Data=='HRS_EUR', 'HRS_EUR\n(10123)', 'PMBB_EUR\n(6740)' ))))]
 
 #from the wes anderson palette:
 cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20")
+cols<-unname(sample(unlist(wes_palettes),12))
 shapes<-c(16,17,18,6,15)
-p2<-dt %>% dplyr::mutate(Test_Data=fct_reorder(Test_Data,pEUR), Label=fct_reorder(Label, N),Label2=fct_reorder(Label2,R2)) %>% as.data.table %>%
-ggplot(aes(x=Test_Data, y=R2,color=Label, group=N, name=pEUR)) +
-geom_point(alpha=0.8, size=2, position=position_dodge(width=0.8), show.legend = T) +
+dt<-dt %>% dplyr::mutate(Test_Data=fct_reorder(Test_Data,pEUR), Label=fct_reorder(Label, N),Label2=fct_reorder(Label2,R2)) %>% as.data.table
+
+p2<-ggplot(dt,aes(x=Test_Data, y=R2,color=Label, group=N, name=pEUR)) +
+        facet_grid(LD_panel~Label2) +
+geom_point(aes(x=Test_Data, y=R2),alpha=0.8, size=2, position=position_dodge(width=0.8), show.legend = T) +
         scale_color_manual(name='',values = cols) +
 geom_errorbar(aes(ymin=R2+SE, ymax=R2-SE), width=0.05, linetype = "dotted",position=position_dodge(width=0.8)) +
-        facet_grid(LD_panel~Label2) +
 theme_bw()+ labs(x="",y="Variance explained (%)", title="") +
-theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12), axis.title.y=element_text("Variance Explained %", size=rel(1.4)))
+theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12))
 
 ss_lab<-levels((dt %>% mutate(Label=fct_reorder(Label, N)))$Label)
 #ggplotly(p2)
@@ -72,10 +74,10 @@ setnames(dt, c('R2_PRS0', 'SE_PRS0'), c('R2','SE'))
 dt$Label<-factor(dt$Label)
 dt<-dt %>% mutate(Label=fct_reorder(Label, N))
 dt[,R2:=round(R2,2)];dt[,pEUR:=round(pEUR,2)]
-dt[,Test_Data:=ifelse(Test_Data=='UKB_CHI', "UKB_CHI\n(1467)", ifelse(Test_Data=='HRS_AFR', 'HRS_AFR\n(2241)', ifelse(Test_Data=='PMBB_AFR', 'PMBB_AFR\n(8673)', ifelse(Test_Data=='HRS_EUR', 'HRS_EUR\n(10123)', 'PMBB_EUR\n(6740)' ))))]
 #from the wes anderson palette:
 
 cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20")
+cols<-unname(sample(unlist(wes_palettes),12))
 dt<-split(dt, by="LD_panel")
 dt[[1]][, y:=dt[[2]]$R2][, SE.y:=dt[[2]]$SE]
 
@@ -165,7 +167,7 @@ RES2[, R2:=round(R2, 2)]
 RES2<-rbind(RES2, expnd)
 #
 
-RES2t<-RES2[Test_Data=="HRS_AFR"][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA", "META_ALL2")] %>% mutate(Label2=fct_reorder(Label2,R2))
+RES2t<-RES2[Test_Data=="HRS_AFR"][Set %in% c("UKBB--META_NEA", "META_ALL2")] %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t<-RES2[Test_Data=="HRS_AFR" & PRS=="PRS"]%>% group_by(Set,Label2, Test_Data) %>% as.data.table %>% unique(by=c("Set","Label2")) %>% as.data.table %>% arrange(Set, Label2) %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t[, Alpha:=ifelse(Set=='META_NEA', 1,0)]
 
@@ -174,7 +176,7 @@ pD<-ggplot() +
         geom_point(data= RES3t[Set!="META_ALL2"], aes(x=Alpha, y=R2, group=Set), size=2.5, col=rep(cols[1:3], each=3), alpha=0.8) + 
         scale_color_manual(name="",values = cols2) + 
         scale_y_continuous(breaks = seq(0, 15, by = 1)) +
-        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.1,3), rep(0.1,3), rep(-0.1,3),rep(0.15, 3)), nudge_y=c(rep(-0.1,3), rep(0.1, 3), rep(-0.1,3),rep(0.2,3)))+
+        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.1,2), rep(0.1,2), rep(-0.1,3),rep(0.15,2)), nudge_y=c(rep(-0.1,2), rep(0.1,2), rep(-0.1,2),rep(0.2,2)))+
         facet_wrap(~Label2) +
         theme_bw() + 
         labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
@@ -184,7 +186,7 @@ pD<-ggplot() +
 pD<-pD+ annotate("text", x = 0.1, y = 15, label = "HRS_AFR", size=3)
 #
 
-RES2t<-RES2[Test_Data=="PMBB_AFR"][Set %in% c("UKBB--META_NEA", "META_EUR--META_NEA", "META_ALL2")] %>% mutate(Label2=fct_reorder(Label2,R2))
+RES2t<-RES2[Test_Data=="PMBB_AFR"][Set %in% c("UKBB--META_NEA", "META_ALL2")] %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t<-RES2[Test_Data=="PMBB_AFR" & PRS=="PRS"]%>% group_by(Set,Label2, Test_Data) %>% as.data.table %>% unique(by=c("Set","Label2")) %>% as.data.table %>% arrange(Set, Label2) %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t[, Alpha:=ifelse(Set=='META_NEA', 1,0)]
 
@@ -193,7 +195,7 @@ pE<-ggplot() +
         geom_point(data= RES3t[Set!="META_ALL2"], aes(x=Alpha, y=R2, group=Set), size=2.5, col=rep(cols[1:3], each=3), alpha=0.8) + 
         scale_color_manual(name="",values = cols2) + 
         scale_y_continuous(breaks = seq(0, 15, by = 1)) +
-        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.1,3), rep(0.1,3), rep(-0.1,3),rep(0.15, 3)), nudge_y=c(rep(-0.1,3), rep(0.1, 3), rep(-0.1,3),rep(0.2,3)))+
+        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.1,2), rep(0.1,2), rep(-0.1,2),rep(0.15, 2)), nudge_y=c(rep(-0.1,2), rep(0.1,2), rep(-0.1,2),rep(0.2,2)))+
         facet_wrap(~Label2) +
         theme_bw() + 
         labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
@@ -202,7 +204,7 @@ pE<-ggplot() +
 #
 pE<-pE+ annotate("text", x = 0.1, y = 15, label = "PMBB_AFR", size=3)
 #
-RES2t<-RES2[Test_Data=="UKB_CHI" & Label2=='all'][Set %in% c("UKBB--BBJ", "META_EUR--BBJ", "META_ALL2")] %>% mutate(Label2=fct_reorder(Label2,R2))
+RES2t<-RES2[Test_Data=="UKB_CHI" & Label2=='all'][Set %in% c("UKBB--BBJ", "META_ALL2")] %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t<-RES2[Test_Data=="UKB_CHI" & PRS=="PRS" & Label2=='all'] %>% group_by(Set,Label2, Test_Data) %>% as.data.table %>% unique(by=c("Set","Label2")) %>% as.data.table %>% arrange(Set, Label2) %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t[, Alpha:=ifelse(Set=='BBJ', 1,0)]
 
@@ -211,7 +213,7 @@ pF<-ggplot() +
         geom_point(data= RES3t[Set!="META_ALL2"], aes(x=Alpha, y=R2, group=Set), size=2.5, col=cols[1:3], alpha=0.8) + 
         scale_color_manual(name="",values = cols2) + 
         scale_y_continuous(breaks = seq(0, 15, by = 1)) +
-        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.1,3), rep(0.1,3), rep(-0.1,3),rep(0.15, 3)), nudge_y=c(rep(-0.1,3), rep(0.1, 3), rep(-0.1,3),rep(0.2,3)))+
+        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.1,2), rep(0.1,2), rep(-0.1,2),rep(0.15, 2)), nudge_y=c(rep(-0.1,2), rep(0.1,2), rep(-0.1,2),rep(0.2,2)))+
         theme_bw() + 
         labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
         theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank())
