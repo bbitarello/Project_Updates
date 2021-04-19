@@ -32,6 +32,7 @@ library("ggvenn")
 ```
 
 ```{r,echo=FALSE, eval=T}
+set.seed(1)
 dt=lapply(c("anc_specific", "1000g_all"), function(x) readRDS(paste0('dts_radius1000_boots_1000_ldpanel_', x, '.Rds'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
 dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
@@ -47,10 +48,11 @@ dt[,R2:=round(R2,2)];dt[,pEUR:=round(pEUR,2)]
 cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20")
 cols<-unname(sample(unlist(wes_palettes),12))
 shapes<-c(16,17,18,6,15)
-dt<-dt %>% dplyr::mutate(Test_Data=fct_reorder(Test_Data,pEUR), Label=fct_reorder(Label, N),Label2=fct_reorder(Label2,R2)) %>% as.data.table
+dt<-dt %>% filter(LD_panel=='anc_specific') %>% dplyr::mutate(Test_Data=fct_reorder(Test_Data,pEUR), Label=fct_reorder(Label, N),Label2=fct_reorder(Label2,R2)) %>% as.data.table
 
 p2<-ggplot(dt,aes(x=Test_Data, y=R2,color=Label, group=N, name=pEUR)) +
-        facet_grid(LD_panel~Label2) +
+        #facet_grid(LD_panel~Label2) +
+        facet_grid(~Label2) +
 geom_point(aes(x=Test_Data, y=R2),alpha=0.8, size=2, position=position_dodge(width=0.8), show.legend = T) +
         scale_color_manual(name='',values = cols) +
 geom_errorbar(aes(ymin=R2+SE, ymax=R2-SE), width=0.05, linetype = "dotted",position=position_dodge(width=0.8)) +
@@ -65,6 +67,7 @@ p2g<-ggplotly(p2)
 ```
 
 ```{r, chunk='Fig 1', out.height = "1300px",out.width="1300px",echo=FALSE, eval=T, , fig.cap="Fig 1: A) Proportion of variance explained. LDpred infinitesimal model with summary statistics from UKBB, BBJ, GIANT, PAGE, and combinations of those. Points are empirical estimates, and error bars are bootrstrap standard errors (n=5,000). B) Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels (only datasets for which original LD panel was not the 1000G are included."}
+set.seed(1)
 dt=lapply(c("anc_specific", "1000g_all"), function(x) readRDS(paste0('dts_radius1000_boots_1000_ldpanel_', x, '.Rds'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
 dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
