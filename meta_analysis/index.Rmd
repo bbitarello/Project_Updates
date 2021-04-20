@@ -38,15 +38,16 @@ dt<-do.call(rbind, dt)
 dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
 dt[, Label:=paste0(Label, ";", N)]
 dt<-dt[,.(R2_PRS0,SE_PRS0,Test_Data, N, Label, Label2, pEUR, LD_panel,ss1)]
-#dt[, Label:=ifelse(ss1=='PRS_META_EUREAS', 'UKBB+BBJ', ifelse(ss1=='PRS_META_EUREAS2', 'UKBB+GIANT+BBJ', ifelse(ss1=='PRS_META_AFR2', 'META_AFR+PAGE', ifelse(ss1=='PRS_META_ALL2','UKBB+GIANT+BBJ+PAGE+META_AFR', ifelse(ss1=='PRS_META_ALL', 'UKBB+BBJ+PAGE+META_AFR',ifelse(ss1=='PRS_META_EUR', 'UKBB+GIANT',ss1))))))]
+dt<-dt[!(ss1 %in% c("PRS_GIANT", "PRS_META_EUR", "PRS_META_ALL2", "PRS_META_EUREAS2"))]
+
 setnames(dt, c('R2_PRS0', 'SE_PRS0'), c('R2','SE'))
 dt$Label<-factor(dt$Label)
 dt<-dt %>% mutate(Label=fct_reorder(Label, N))
 dt[,R2:=round(R2,2)];dt[,pEUR:=round(pEUR,2)]
 
 #from the wes anderson palette:
-cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20")
-cols<-unname(sample(unlist(wes_palettes),12))
+#cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20")
+cols<-unname(sample(unlist(wes_palettes),8))
 shapes<-c(16,17,18,6,15)
 dt<-dt %>% filter(LD_panel=='anc_specific') %>% dplyr::mutate(Test_Data=fct_reorder(Test_Data,pEUR), Label=fct_reorder(Label, N),Label2=fct_reorder(Label2,R2)) %>% as.data.table
 
@@ -63,6 +64,7 @@ ss_lab<-levels((dt %>% mutate(Label=fct_reorder(Label, N)))$Label)
 #ggplotly(p2)
 #p2<-p2+guides(color=TRUE)
 p2g<-ggplotly(p2)
+saveRDS(dt, file="dt.Rds")
 #for(i in 1:length(p2g[['x']][['data']])){p2g[['x']][['data']][[i]]$showlegend<-F}
 ```
 
@@ -73,14 +75,15 @@ dt<-do.call(rbind, dt)
 dt$LD_panel<-factor(dt$LD_panel, levels(factor(dt$LD_panel))[c(2,1)])
 dt[, Label:=paste0(Label, ";", N)]
 dt<-dt[,.(R2_PRS0,SE_PRS0,Test_Data, N, Label, Label2, pEUR, LD_panel,ss1)]
+dt<-dt[!(ss1 %in% c("PRS_GIANT", "PRS_META_EUR", "PRS_META_ALL2", "PRS_META_EUREAS2"))]
 setnames(dt, c('R2_PRS0', 'SE_PRS0'), c('R2','SE'))
 dt$Label<-factor(dt$Label)
 dt<-dt %>% mutate(Label=fct_reorder(Label, N))
 dt[,R2:=round(R2,2)];dt[,pEUR:=round(pEUR,2)]
 #from the wes anderson palette:
 
-cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20")
-cols<-unname(sample(unlist(wes_palettes),12))
+#cols<-c("#D8A499","#DD8D29","#899DA4","#5F5647","#A2A475","#7294D4","#550307", "#F1BB7B","#5BBCD6", "#B40F20")
+cols<-unname(sample(unlist(wes_palettes),10))
 dt<-split(dt, by="LD_panel")
 dt[[1]][, y:=dt[[2]]$R2][, SE.y:=dt[[2]]$SE]
 
@@ -88,7 +91,6 @@ shapes<-c(16,17,18,6,15)
 setnames(dt[[1]], c('R2', 'y'), c('Anc_R2','1000g_R2'))
 p3<-dt[[1]] %>% 
         dplyr::mutate(Label2=fct_reorder(Test_Data,pEUR), Label=fct_reorder(Label, N)) %>%
-        #filter(!Summary_Stats %in% c("META_ALL", "META_ALL2", "META_AFR2", "META_EUR")) %>% 
         ggplot(aes(x=Anc_R2, y=`1000g_R2`)) +
 geom_point(aes(shape=Test_Data, colour=Label), size=2.9, alpha=0.8, fill='white', show.legend=T) +
         geom_errorbarh(aes(xmin=Anc_R2+SE, xmax=Anc_R2-SE, colour=Label), width=0.03, linetype = "dotted", alpha=0.5)+
@@ -117,9 +119,9 @@ subplot(p2g, p3g, nrows = 2, margin = c(0.03, 0.02, 0.02, 0.03), shareX=F, share
 
 
 ```{r, echo=F}
-set.seed(418)
+set.seed(2)
 cols2<-c(unname(sample(unlist(wesanderson::wes_palettes),3)), "lightgray")
-res1<-readRDS('resPRS_multi.RDs')
+res1<-readRDS('resPRS_multi_anc_specific.Rds')
 res1<-do.call(rbind, lapply(res1, function(x) do.call(rbind, x)))
 res2<-unique(res1, by=c("Test_Data", "Set", "Alpha", "Label2"))
 res2<-res2[, .(Alpha, R2_PRS1, R2_PRS2, Label2, Test_Data, Set)][,]
@@ -134,24 +136,27 @@ setnames(res3, 'value', 'R2')
 #
 Alpha=seq(from=0, to=1, by=0.1)
 expnd<-rbind(
-        expand.grid(Test_Data="HRS_AFR", Set=c("UKBB", "META_EUR", "META_NEA", "META_ALL2"), Label2=c("all", "pEUR>0.17", "pEUR<0.17"), PRS="PRS"), expand.grid(Test_Data="PMBB_AFR", Set=c("UKBB", "META_EUR", "META_NEA", "META_ALL2"), Label2=c("all", "pEUR>0.17", "pEUR<0.17"), PRS="PRS"),expand.grid(Test_Data="UKB_CHI", Set=c("UKBB", "META_EUR", "BBJ", "META_ALL2"), Label2="all", PRS="PRS"))
+        expand.grid(Test_Data="HRS_AFR", Set=c("UKBB","META_NEA", "META_ALL"), Label2=c("all", "pEUR<0.17", "pEUR>0.17"), PRS="PRS"), expand.grid(Test_Data="PMBB_AFR", Set=c("UKBB", "META_NEA", "META_ALL"), Label2=c("all", "pEUR<0.17", "pEUR>0.17"), PRS="PRS"),expand.grid(Test_Data="UKB_CHI", Set=c("UKBB", "BBJ", "UKBB+BBJ"), Label2="all", PRS="PRS"))
 setDT(expnd)
 expnd<-cbind(expnd,Alpha=rep(Alpha,28)) %>% as.data.table
 expnd[, Label:=ifelse(Test_Data=="HRS_AFR","HRS_AFR\n(2241)", ifelse(Test_Data=="PMBB_AFR", "PMBB_AFR\n(8673)", "UKB_CHI\n(1467)"))]      
-        
+
+dt<-readRDS(file="dt.Rds") 
+
 expnd<-bind_rows(
         expnd %>% filter(Test_Data=="HRS_AFR"& Set=='UKBB') %>% mutate(R2=ifelse(Label2=='all', 5.54, ifelse(Label2=="pEUR<0.17", 4.84, 6.61))) %>% as.data.table, 
         expnd %>% filter(Test_Data=="PMBB_AFR"& Set=='UKBB') %>% mutate(R2=ifelse(Label2=='all', 4.97, ifelse(Label2=="pEUR<0.17", 4.55, 6.88))) %>% as.data.table, 
         expnd %>% filter(Test_Data=="UKB_CHI"& Set=='UKBB') %>% mutate(R2=10.23) %>% as.data.table,
-        expnd %>% filter(Test_Data=="HRS_AFR"& Set=='META_EUR') %>% mutate(R2=ifelse(Label2=='all', 6.12, ifelse(Label2=="pEUR<0.17", 5.04,7.81))) %>% as.data.table, 
-        expnd %>% filter(Test_Data=="PMBB_AFR"& Set=='META_EUR') %>% mutate(R2=ifelse(Label2=='all', 5.49, ifelse(Label2=="pEUR<0.17", 3.55,7.42))) %>% as.data.table, 
-        expnd %>% filter(Test_Data=="UKB_CHI"& Set=='META_EUR') %>% mutate(R2=12.21) %>% as.data.table,
-        expnd %>% filter(Test_Data=="HRS_AFR"& Set=='META_ALL2') %>% mutate(R2=ifelse(Label2=='all', 8.29, ifelse(Label2=="pEUR<0.17", 5.85,11.74))) %>% as.data.table, 
-        expnd %>% filter(Test_Data=="PMBB_AFR"& Set=='META_ALL2') %>% mutate(R2=ifelse(Label2=='all', 8.07, ifelse(Label2=="pEUR<0.17", 6.53,9.45))) %>% as.data.table, 
-        expnd %>% filter(Test_Data=="UKB_CHI"& Set=='META_ALL2') %>% mutate(R2=12.91) %>% as.data.table,
+        #expnd %>% filter(Test_Data=="HRS_AFR"& Set=='META_EUR') %>% mutate(R2=ifelse(Label2=='all', 6.12, ifelse(Label2=="pEUR<0.17", 5.04,7.81))) %>% as.data.table, 
+      #  expnd %>% filter(Test_Data=="PMBB_AFR"& Set=='META_EUR') %>% mutate(R2=ifelse(Label2=='all', 5.49, ifelse(Label2=="pEUR<0.17", 3.55,7.42))) %>% as.data.table, 
+       # expnd %>% filter(Test_Data=="UKB_CHI"& Set=='META_EUR') %>% mutate(R2=12.21) %>% as.data.table,
+        expnd %>% filter(Test_Data=="HRS_AFR"& Set=='META_ALL') %>% mutate(R2=ifelse(Label2=='all', 5.26, ifelse(Label2=="pEUR<0.17", 4.28,6.72))) %>% as.data.table,
+         expnd %>% filter(Test_Data=="PMBB_AFR"& Set=='META_ALL') %>% mutate(R2=ifelse(Label2=='all', 6.05, ifelse(Label2=="pEUR<0.17", 4.60,9.45))) %>% as.data.table, 
+        expnd %>% filter(Test_Data=="UKB_CHI"& Set=='META_ALL') %>% mutate(R2=8.36) %>% as.data.table,
         expnd %>% filter(Test_Data=="HRS_AFR"& Set=='META_NEA') %>% mutate(R2=ifelse(Label2=='all', 4.72, ifelse(Label2=="pEUR<0.17", 4.11,5.57))) %>% as.data.table, 
-        expnd %>% filter(Test_Data=="PMBB_AFR"& Set=='META_NEA') %>% mutate(R2=ifelse(Label2=='all', 5.42, ifelse(Label2=="pEUR<0.17", 4.82,5.91))) %>% as.data.table, 
-        expnd %>% filter(Test_Data=="UKB_CHI"& Set=='BBJ') %>% mutate(R2=7.67) %>% as.data.table)
+        expnd %>% filter(Test_Data=="PMBB_AFR"& Set=='META_NEA') %>% mutate(R2=ifelse(Label2=='all', 5.42, ifelse(Label2=="pEUR<0.17", 4.82,5.93))) %>% as.data.table, 
+        expnd %>% filter(Test_Data=="UKB_CHI"& Set=='BBJ') %>% mutate(R2=7.81) %>% as.data.table,
+        expnd %>% filter(Test_Data=="UKB_CHI"& Set=='UKBB+BBJ') %>% mutate(R2=9.85) %>% as.data.table)
         
          
 setDT(expnd)
@@ -170,53 +175,53 @@ RES2[, R2:=round(R2, 2)]
 RES2<-rbind(RES2, expnd)
 #
 
-RES2t<-RES2[Test_Data=="HRS_AFR"][Set %in% c("UKBB--META_NEA", "META_ALL2")] %>% mutate(Label2=fct_reorder(Label2,R2))
+RES2t<-RES2[Test_Data=="HRS_AFR"][Set %in% c("UKBB--META_NEA", "META_ALL")] %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t<-RES2[Test_Data=="HRS_AFR" & PRS=="PRS"]%>% group_by(Set,Label2, Test_Data) %>% as.data.table %>% unique(by=c("Set","Label2")) %>% as.data.table %>% arrange(Set, Label2) %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t[, Alpha:=ifelse(Set=='META_NEA', 1,0)]
-
+RES3t$Label2<-factor(RES3t$Label2,levels(RES3t$Label2)[c(1,3,2)])
 pD<-ggplot() + 
         geom_line(data=RES2t, aes(x=Alpha, y=R2, color=Set, linetype=PRS), size=0.6, show.legend=F) + 
-        geom_point(data= RES3t[Set!="META_ALL2"], aes(x=Alpha, y=R2, group=Set), size=2.5, col=rep(cols[1:3], each=3), alpha=0.8) + 
+        geom_point(data= RES3t[Set!="META_ALL"], aes(x=Alpha, y=R2, group=Set), size=2, col=rep(cols[c(6,5)], each=3), alpha=0.8) + 
+        facet_wrap(~Label2) +
         scale_color_manual(name="",values = cols2) + 
         scale_y_continuous(breaks = seq(0, 15, by = 1)) +
-        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.1,2), rep(0.1,2), rep(-0.1,3),rep(0.15,2)), nudge_y=c(rep(-0.1,2), rep(0.1,2), rep(-0.1,2),rep(0.2,2)))+
-        facet_wrap(~Label2) +
+        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.08,3), rep(-0.1,3), rep(0.5,3)), nudge_y=c(rep(-0.05,3), rep(-0.05,3), rep(0.2,3)))+
         theme_bw() + 
         labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
         theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank())
 #
 #
-pD<-pD+ annotate("text", x = 0.1, y = 15, label = "HRS_AFR", size=3)
+pD<-pD+ annotate("text", x = 0.1, y = 10, label = "HRS_AFR", size=3)
 #
 
-RES2t<-RES2[Test_Data=="PMBB_AFR"][Set %in% c("UKBB--META_NEA", "META_ALL2")] %>% mutate(Label2=fct_reorder(Label2,R2))
+RES2t<-RES2[Test_Data=="PMBB_AFR"][Set %in% c("UKBB--META_NEA", "META_ALL")] %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t<-RES2[Test_Data=="PMBB_AFR" & PRS=="PRS"]%>% group_by(Set,Label2, Test_Data) %>% as.data.table %>% unique(by=c("Set","Label2")) %>% as.data.table %>% arrange(Set, Label2) %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t[, Alpha:=ifelse(Set=='META_NEA', 1,0)]
-
+RES3t$Label2<-factor(RES3t$Label2,levels(RES3t$Label2)[c(1,3,2)])
 pE<-ggplot() + 
         geom_line(data=RES2t, aes(x=Alpha, y=R2, color=Set, linetype=PRS), size=0.6, show.legend=F) + 
-        geom_point(data= RES3t[Set!="META_ALL2"], aes(x=Alpha, y=R2, group=Set), size=2.5, col=rep(cols[1:3], each=3), alpha=0.8) + 
+        geom_point(data= RES3t[Set!="META_ALL"], aes(x=Alpha, y=R2, group=Set), size=2, col=rep(cols[c(6,5)], each=3), alpha=0.8) + 
         scale_color_manual(name="",values = cols2) + 
         scale_y_continuous(breaks = seq(0, 15, by = 1)) +
-        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.1,2), rep(0.1,2), rep(-0.1,2),rep(0.15, 2)), nudge_y=c(rep(-0.1,2), rep(0.1,2), rep(-0.1,2),rep(0.2,2)))+
+        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.08,3), rep(-0.1,3), rep(0.5,3)), nudge_y=c(rep(-0.05,3), rep(-0.05,3), rep(0.2,3)))+
         facet_wrap(~Label2) +
         theme_bw() + 
         labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
         theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank())
 #
 #
-pE<-pE+ annotate("text", x = 0.1, y = 15, label = "PMBB_AFR", size=3)
+pE<-pE+ annotate("text", x = 0.1, y = 10, label = "PMBB_AFR", size=3)
 #
-RES2t<-RES2[Test_Data=="UKB_CHI" & Label2=='all'][Set %in% c("UKBB--BBJ", "META_ALL2")] %>% mutate(Label2=fct_reorder(Label2,R2))
+RES2t<-RES2[Test_Data=="UKB_CHI" & Label2=='all'][Set %in% c("UKBB--BBJ", "UKBB+BBJ")] %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t<-RES2[Test_Data=="UKB_CHI" & PRS=="PRS" & Label2=='all'] %>% group_by(Set,Label2, Test_Data) %>% as.data.table %>% unique(by=c("Set","Label2")) %>% as.data.table %>% arrange(Set, Label2) %>% mutate(Label2=fct_reorder(Label2,R2))
 RES3t[, Alpha:=ifelse(Set=='BBJ', 1,0)]
 
 pF<-ggplot() + 
         geom_line(data=RES2t, aes(x=Alpha, y=R2, color=Set, linetype=PRS), size=0.6, show.legend=F) + 
-        geom_point(data= RES3t[Set!="META_ALL2"], aes(x=Alpha, y=R2, group=Set), size=2.5, col=cols[1:3], alpha=0.8) + 
+        geom_point(data= RES3t[Set!="UKBB+BBJ"], aes(x=Alpha, y=R2, group=Set), size=2, col=cols[c(6,4)], alpha=0.8) + 
         scale_color_manual(name="",values = cols2) + 
         scale_y_continuous(breaks = seq(0, 15, by = 1)) +
-        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(rep(0.1,2), rep(0.1,2), rep(-0.1,2),rep(0.15, 2)), nudge_y=c(rep(-0.1,2), rep(0.1,2), rep(-0.1,2),rep(0.2,2)))+
+        geom_text(data=RES3t, aes(x=Alpha, y=R2, label=Set, group=Label2), size=2.5, nudge_x=c(0.04,-0.05,0.5), nudge_y=c(-0.05,-0.05,0.2))+
         theme_bw() + 
         labs(x="Alpha",y="Variance explained (%)", title="", legend="") + 
         theme(axis.text.x = element_text(size=12), axis.text.y = element_text(size=12),axis.title.y=element_text(size=rel(1.4)), legend.title = element_blank())
@@ -225,17 +230,17 @@ pF<-pF+ annotate("text", x = 0.1, y = 15, label = "UKB_CHI", size=3)
 #
 ```
 
-```{r, chunk='Fig2',out.height = "960px",out.width="860px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).HRS_AFR (top), PMBB_AFR (middle), UKB_CHI (bottom)"}
+```{r, chunk='Fig2',out.height = "960px",out.width="860px",echo=FALSE, eval=T, fig.cap="Fig 2: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).HRS_AFR (top), PMBB_AFR (bottom)."}
 subplot(style(ggplotly(pD), showlegend=F), ggplotly(pE), nrows=2, shareX=F, shareY=F)
 ```
 
 
 
-```{r, chunk='Fig3',out.height = "560px",out.width="960px",echo=FALSE, eval=T, fig.cap="Fig 3: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS, PRS1, PRS2).UKB_CHI"}
+```{r, chunk='Fig3',out.height = "960px",out.width="860px",echo=FALSE, eval=T, fig.cap="Fig 3: Proportion of variance explained. PRS calculated using linear combinations of PRS weights from LDpred-inf (PRS1, PRS2) and using local ancestry PRS (PRS3).UKB_CHI."}
 ggplotly(pF)
 ```
 
-```{r,echo=F}
+```{r,echo=F, eval=F}
 set.seed(125)
 cols3<-unname(sample(unlist(wesanderson::wes_palettes),5))
 g1000<-readRDS('g1000_1000g_ALL_LD_panel.Rds')
@@ -256,7 +261,7 @@ g1000<-g1000[Summary_Stats!="GIANT0"][Summary_Stats!="GIANT2"]
 g1000$Label<-factor(g1000$Label,levels=levels(factor(g1000$Label))[c(2,1,7,6,9,3,4,5,8,10)])
 ```
 
-```{r, chunk='Fig5', out.height = "1260px",out.width="1260px",echo=FALSE, eval=T, fig.cap="Fig 4: PRS for height for 2,503 individuals from the 1000 Genomes Project. PRS values are scaled around the mean and standard deviations of PRS for the EUR population, for each set of summary statistics.LD panel: 1000g_all"}
+```{r, chunk='Fig4', out.height = "1260px",out.width="1260px",echo=FALSE, eval=F, fig.cap="Fig 4: PRS for height for 2,503 individuals from the 1000 Genomes Project. PRS values are scaled around the mean and standard deviations of PRS for the EUR population, for each set of summary statistics.LD panel: 1000g_all"}
 #p1000_A<-ggplotly(p1000_A)
 #p1000_B<-ggplotly(p1000_B)
 #p1000_C<-ggplotly(p1000_C)
@@ -274,7 +279,7 @@ scale_fill_manual(values=cols3, name="Populations") + theme_bw()
 ggplotly(p1000_A)
 ```
 
-```{r, chunk='Fig6', out.height = "1260px",out.width="1260px",echo=FALSE, eval=T, fig.cap="Fig 5: PRS for height for 2,503 individuals from the 1000 Genomes Project. PRS values are scaled around the mean and standard deviations of PRS for the EUR population, for each set of summary statistics.LD panel: anc specific."}
+```{r, chunk='Fig4', out.height = "1260px",out.width="1260px",echo=FALSE, eval=T, fig.cap="Fig 4: PRS for height for 2,503 individuals from the 1000 Genomes Project. PRS values are scaled around the mean and standard deviations of PRS for the EUR population, for each set of summary statistics.LD panel: anc specific."}
 set.seed(125)
 cols3<-unname(sample(unlist(wesanderson::wes_palettes),5))
 g1000<-readRDS('g1000_anc_specific_LD_panel.Rds')
@@ -303,7 +308,7 @@ scale_fill_manual(values=cols3, name="Populations") + theme_bw()
 ggplotly(p1000_A)
 ```
 
-```{r, echo=F}
+```{r, echo=F, eval=F}
 dt<-fread('ss_datasets.txt')
 dt[, Main_ancestry:=c('Afr+Eur', 'Afr','Afr, Afr+Eur', 'Afr, Afr+Eur', 'Afr+Eur,Latino, others', 'Afr, Afr+Eur, Latino, others', 'East Asian', 'E. Asian,Afr+Eur, Afr, Latino, others', 'Eur', 'Eur', 'Eur, E.Asian, Afr, Afr+Eur, Latino, others', 'Eur', 'Eur, E.Asian, Afr, Afr+Eur, Latino, others')]
 dt[, LD_panel_ldpred:=c("N/A","N/A", "N/A","1KGP3_afr(N=660)","1KGP3_nea(N=2001)", "1KGP3_nea(N=2001)", "1KGP3_eas(N=504)", "1KGP3_nea(N=2001)", "UKB_EUR(N=8000)", "UKB_EUR(N=8000)","1KGP3_all(N=2598)","UKB_EUR(N=8000)", "1KGP3_all(N=2598)")]
@@ -314,7 +319,7 @@ my_table
 ```
 
 
-```{r, echo=F}
+```{r, echo=F,eval=F}
 dt4<-data.table(Dataset=c('UKBB_chi', 'PMBB_afr', 'HRS_afr', 'PMBB_eur', 'HRS_eur'), N=c(1467,8726,2251,6709,10159), SNPs_UKBB=c(148521,157187,160326,975002))
 my_table4<-datatable(dt4,options = list(pageLength = 12), caption="Table 2. Test data post filtering")
 my_table4
