@@ -68,7 +68,7 @@ saveRDS(dt, file="dt.Rds")
 #for(i in 1:length(p2g[['x']][['data']])){p2g[['x']][['data']][[i]]$showlegend<-F}
 ```
 
-```{r, chunk='Fig 1', out.height = "1300px",out.width="1300px",echo=FALSE, eval=T, , fig.cap="Fig 1: A) Proportion of variance explained. LDpred infinitesimal model with summary statistics from UKBB, BBJ, GIANT, PAGE, and combinations of those. Points are empirical estimates, and error bars are bootrstrap standard errors (n=5,000). B) Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels (only datasets for which original LD panel was not the 1000G are included."}
+```{r, chunk='Fig 1', out.height = "1300px",out.width="1400px",echo=FALSE, eval=T, , fig.cap="Fig 1: A) Proportion of variance explained. LDpred infinitesimal model with summary statistics from UKBB, BBJ, GIANT, PAGE, and combinations of those. Points are empirical estimates, and error bars are bootrstrap standard errors (n=5,000). B) Proportion of variance explained when using 1000G (all) as LD reference panel vs. using ancestry-matching LD panels (only datasets for which original LD panel was not the 1000G are included."}
 set.seed(1)
 dt=lapply(c("anc_specific", "1000g_all"), function(x) readRDS(paste0('dts_radius1000_boots_1000_ldpanel_', x, '.Rds'))[, LD_panel:=x])
 dt<-do.call(rbind, dt)
@@ -146,7 +146,7 @@ dt<-readRDS(file="dt.Rds")
 expnd<-bind_rows(
         expnd %>% filter(Test_Data=="HRS_AFR"& Set=='UKBB') %>% mutate(R2=ifelse(Label2=='all', 5.54, ifelse(Label2=="pEUR<0.17", 4.84, 6.61))) %>% as.data.table, 
         expnd %>% filter(Test_Data=="PMBB_AFR"& Set=='UKBB') %>% mutate(R2=ifelse(Label2=='all', 4.97, ifelse(Label2=="pEUR<0.17", 4.55, 6.88))) %>% as.data.table, 
-        expnd %>% filter(Test_Data=="UKB_CHI"& Set=='UKBB') %>% mutate(R2=10.23) %>% as.data.table,
+        expnd %>% filter(Test_Data=="UKB_CHI"& Set=='UKBB') %>% mutate(R2=10.65) %>% as.data.table,
         #expnd %>% filter(Test_Data=="HRS_AFR"& Set=='META_EUR') %>% mutate(R2=ifelse(Label2=='all', 6.12, ifelse(Label2=="pEUR<0.17", 5.04,7.81))) %>% as.data.table, 
       #  expnd %>% filter(Test_Data=="PMBB_AFR"& Set=='META_EUR') %>% mutate(R2=ifelse(Label2=='all', 5.49, ifelse(Label2=="pEUR<0.17", 3.55,7.42))) %>% as.data.table, 
        # expnd %>% filter(Test_Data=="UKB_CHI"& Set=='META_EUR') %>% mutate(R2=12.21) %>% as.data.table,
